@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { MONGODB_URI } = require('./config');
+const { MONGODB_URI } = require('./config/config');
 
 const app = express();
 
