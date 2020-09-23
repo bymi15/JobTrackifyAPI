@@ -1,6 +1,6 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const { MONGODB_URI } = require('./config/config');
+import express from 'express';
+import mongoose from 'mongoose';
+import { MONGODB_URI } from './config/config';
 
 const app = express();
 
