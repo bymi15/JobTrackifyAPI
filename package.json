@@ -30,6 +30,7 @@
     "express-jwt": "^6.0.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.10.5",
+    "typedi": "^0.8.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {
