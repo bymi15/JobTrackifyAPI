@@ -13,7 +13,7 @@ const Company = new mongoose.Schema(
     industry: String,
     foundedYear: Number,
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 export default mongoose.model('Company', Company);

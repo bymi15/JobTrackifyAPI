@@ -1,17 +1,23 @@
 import express from 'express';
-import mongoose from 'mongoose';
-import { MONGODB_URI } from './config/config';
+import Logger from './loaders/logger';
+import config from './config';
 
-const app = express();
+const startServer = async () => {
+  const app = express();
+  const loaders = await import('./loaders');
+  await loaders.default(app);
 
-mongoose
-  .connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.log(err));
+  app.listen(config.port, (err) => {
+    if (err) {
+      Logger.error(err);
+      process.exit(1);
+    }
+    Logger.info(`
+      ################################################
+      #  Server listening on port: ${config.port}    
+      ################################################
+    `);
+  });
+};
 
-const PORT = process.env.PORT || 8000;
-app.get('/', (req, res) => {
-  res.send('hello world');
-});
-
-app.listen(PORT, () => console.log(`Server running at port ${PORT}`));
+startServer();
