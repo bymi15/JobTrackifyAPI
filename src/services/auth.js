@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import Logger from '../loaders/logger';
+import Logger from '../logger';
 import User from '../models/user';
 import config from '../config';
 

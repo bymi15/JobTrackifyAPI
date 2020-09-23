@@ -1,5 +1,5 @@
 import express from 'express';
-import Logger from './loaders/logger';
+import Logger from './logger';
 import config from './config';
 
 const startServer = async () => {
