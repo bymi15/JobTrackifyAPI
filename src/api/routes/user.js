@@ -5,7 +5,7 @@ const route = Router();
 
 export default (app) => {
   app.use('/user', route);
-  route.get('/me', isAuth, attachCurrentUser, (req, res) => {
+  route.get('/', isAuth, attachCurrentUser, (req, res) => {
     return res.json({ user: req.currentUser }).status(200);
   });
 };
