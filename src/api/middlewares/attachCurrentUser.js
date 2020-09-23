@@ -1,5 +1,4 @@
-import Logger from '../../logger';
-import User from '../../models/user';
+import { Container } from 'typedi';
 
 /**
  * Attach user to req.currentUser
@@ -8,8 +7,10 @@ import User from '../../models/user';
  * @param {*} next  Express next Function
  */
 const attachCurrentUser = async (req, res, next) => {
+  const logger = Container.get('logger');
   try {
-    const userRecord = await User.findById(req.token._id);
+    const userModel = Container.get('userModel');
+    const userRecord = await userModel.findById(req.token._id);
     if (!userRecord) {
       return res.sendStatus(401);
     }
@@ -18,7 +19,7 @@ const attachCurrentUser = async (req, res, next) => {
     req.currentUser = currentUser;
     return next();
   } catch (e) {
-    Logger.error('Error attaching user to req: %o', e);
+    logger.error('Error attaching user to req: %o', e);
     return next(e);
   }
 };

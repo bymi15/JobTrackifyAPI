@@ -1,7 +1,7 @@
 import { Router } from 'express';
+import { Container } from 'typedi';
 import { celebrate, Joi } from 'celebrate';
 import AuthService from '../../services/auth';
-import Logger from '../../logger';
 
 const route = Router();
 
@@ -18,12 +18,14 @@ export default (app) => {
       }),
     }),
     async (req, res, next) => {
-      Logger.debug('Calling /register endpoint with body: %o', req.body);
+      const logger = Container.get('logger');
+      logger.debug('Calling /register endpoint with body: %o', req.body);
       try {
-        const { user, token } = await AuthService.register(req.body);
+        const authServiceInstance = Container.get(AuthService);
+        const { user, token } = await authServiceInstance.register(req.body);
         return res.status(201).json({ user, token });
       } catch (e) {
-        Logger.error('Error: %o', e);
+        logger.error('Error: %o', e);
         return next(e);
       }
     }
@@ -38,15 +40,17 @@ export default (app) => {
       }),
     }),
     async (req, res, next) => {
-      Logger.debug('Calling /login endpoint with body: %o', req.body);
+      const logger = Container.get('logger');
+      logger.debug('Calling /login endpoint with body: %o', req.body);
       try {
-        const { user, token } = await AuthService.login(
+        const authServiceInstance = Container.get(AuthService);
+        const { user, token } = await authServiceInstance.login(
           req.body.email,
           req.body.password
         );
         return res.json({ user, token }).status(200);
       } catch (e) {
-        Logger.error('Error: %o', e);
+        logger.error('Error: %o', e);
         return next(e);
       }
     }
