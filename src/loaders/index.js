@@ -1,6 +1,6 @@
 import expressLoader from './express';
 import mongodbLoader from './mongodb';
-import Logger from './logger';
+import Logger from '../logger';
 
 export default async (app) => {
   await mongodbLoader();

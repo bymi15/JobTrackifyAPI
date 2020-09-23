@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { celebrate, Joi } from 'celebrate';
 import AuthService from '../../services/auth';
-import Logger from '../../loaders/logger';
+import Logger from '../../logger';
 
 const route = Router();
 
