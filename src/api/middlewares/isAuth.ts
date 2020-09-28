@@ -1,10 +1,8 @@
 import jwt from 'express-jwt';
 import config from '../../config';
+import { Request } from 'express';
 
-/**
- * Authorization: Bearer ${JWT}
- */
-const getTokenFromHeader = (req) => {
+const getTokenFromHeader = (req: Request) => {
   if (
     (req.headers.authorization &&
       req.headers.authorization.split(' ')[0] === 'Token') ||
@@ -18,7 +16,7 @@ const getTokenFromHeader = (req) => {
 
 const isAuth = jwt({
   secret: config.jwtSecret, // The _secret_ to sign the JWTs
-  userProperty: 'token', // Use req.token to store the JWT
+  requestProperty: 'token', // Use req.token to store the JWT
   getToken: getTokenFromHeader, // How to extract the JWT from the request
   algorithms: ['HS256'], // Use the HS256 (HMAC with SHA-256) algorithm
 });
