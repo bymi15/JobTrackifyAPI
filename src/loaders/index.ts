@@ -8,7 +8,11 @@ export default async (app: Application): Promise<void> => {
   dependencyInjector();
   Logger.info('Dependency injector loaded!');
 
-  await databaseLoader();
+  try {
+    await databaseLoader(process.env.NODE_ENV);
+  } catch (err) {
+    throw err;
+  }
   Logger.info('Database loaded and connected!');
 
   expressLoader(app);

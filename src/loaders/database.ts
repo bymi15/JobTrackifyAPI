@@ -1,12 +1,19 @@
 import Logger from '../logger';
-import { createConnection, useContainer } from 'typeorm';
+import {
+  Connection,
+  createConnection,
+  getConnectionOptions,
+  useContainer,
+} from 'typeorm';
 import { Container } from 'typedi';
 
-export default async (): Promise<void> => {
+export default async (connectionName: string): Promise<Connection> => {
   useContainer(Container);
   try {
-    await createConnection();
+    const options = await getConnectionOptions(connectionName);
+    return await createConnection({ ...options, name: 'default' });
   } catch (err) {
     Logger.debug(err);
+    throw err;
   }
 };

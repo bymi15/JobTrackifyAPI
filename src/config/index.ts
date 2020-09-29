@@ -10,6 +10,7 @@ if (envFound.error) {
 export default {
   port: process.env.PORT || 8000,
   databaseURL: process.env.MONGODB_URI,
+  testDatabaseURL: process.env.MONGODB_TEST_URI,
   jwtSecret: process.env.JWT_SECRET,
   logs: {
     level: process.env.LOG_LEVEL,

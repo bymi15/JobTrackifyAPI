@@ -5,8 +5,13 @@ import config from './config';
 
 const startServer = async () => {
   const app = express();
-  const loaders = await import('./loaders');
-  await loaders.default(app);
+  try {
+    const loaders = await import('./loaders');
+    await loaders.default(app);
+  } catch (err) {
+    Logger.error('Loader failed. Server shutting down...');
+    return;
+  }
 
   app.listen(config.port, () => {
     Logger.info(`
