@@ -41,6 +41,7 @@ export default (app: Application): void => {
           messageArr.push(msg);
         });
       }
+      Logger.error('Error: %o', messageArr);
       res.status(400).json({ errors: messageArr }).end();
     } else {
       next(err);
