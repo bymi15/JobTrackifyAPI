@@ -36,3 +36,6 @@ typings/
 
 # VS Code Settings
 .vscode/
+
+# Local MongoDB Data Directory for testing
+.mongodb/
