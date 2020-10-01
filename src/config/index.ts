@@ -7,10 +7,14 @@ if (envFound.error) {
   throw new Error("Couldn't find .env file!");
 }
 
+let databaseUrl = process.env.MONGODB_URI;
+if (process.env.NODE_ENV === 'test') {
+  databaseUrl = process.env.MONGODB_TEST_URI;
+}
+
 export default {
   port: process.env.PORT || 8000,
-  databaseURL: process.env.MONGODB_URI,
-  testDatabaseURL: process.env.MONGODB_TEST_URI,
+  databaseURL: databaseUrl,
   jwtSecret: process.env.JWT_SECRET,
   logs: {
     level: process.env.LOG_LEVEL,

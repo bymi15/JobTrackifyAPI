@@ -9,7 +9,7 @@ export default async (app: Application): Promise<void> => {
   Logger.info('Dependency injector loaded!');
 
   try {
-    await databaseLoader(process.env.NODE_ENV);
+    await databaseLoader();
   } catch (err) {
     throw err;
   }

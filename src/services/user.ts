@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import config from '../config';
 import { Inject, Service } from 'typedi';
-import { User } from '../entity/User';
+import { User } from '../entities/User';
 import { MongoRepository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Logger } from 'winston';
@@ -23,35 +23,36 @@ export default class UserService {
   }
 
   async register(userInputDTO: IUserInputDTO): Promise<IUserTokenObject> {
+    this.logger.debug('Hashing password');
+    const hashedPassword = await bcrypt.hash(userInputDTO.password, 12);
+
+    this.logger.debug('Creating user db record');
+    const newUser = new User({
+      firstName: userInputDTO.firstName,
+      lastName: userInputDTO.lastName,
+      email: userInputDTO.email,
+      password: hashedPassword,
+    });
+
+    const errors = await validate(newUser, {
+      validationError: { target: false },
+    });
+    if (errors.length > 0) throw errors;
+
     try {
-      this.logger.debug('Hashing password');
-      const hashedPassword = await bcrypt.hash(userInputDTO.password, 12);
-
-      this.logger.debug('Creating user db record');
-      const newUser = new User();
-      newUser.fullName = userInputDTO.fullName;
-      newUser.email = userInputDTO.email;
-      newUser.password = hashedPassword;
-
-      const errors = await validate(newUser, {
-        validationError: { target: false },
-      });
-      if (errors.length > 0) throw errors;
+      const foundUser = await this.userRepo.findOne({ email: newUser.email });
+      if (foundUser) throw new Error('The email address already exists');
 
       const userRecord: User = await this.userRepo.save(newUser);
+      if (!userRecord) throw new Error('User cannot be created');
 
       this.logger.debug('Generating JWT');
       const token = this.generateToken(userRecord);
-
-      if (!userRecord) throw new Error('User cannot be created');
 
       const user = userRecord;
       Reflect.deleteProperty(user, 'password');
       return { user, token };
     } catch (e) {
-      if (e.name === 'BulkWriteError') {
-        e.message = 'The email address already exists';
-      }
       throw e;
     }
   }
@@ -84,7 +85,7 @@ export default class UserService {
       {
         id: userRecord.id,
         role: userRecord.role,
-        fullName: userRecord.fullName,
+        email: userRecord.email,
         exp: exp.getTime() / 1000,
       },
       config.jwtSecret

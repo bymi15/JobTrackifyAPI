@@ -1,7 +1,8 @@
-import { User } from '../entity/User';
+import { User } from '../entities/User';
 
 export interface IUserInputDTO {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
 }
