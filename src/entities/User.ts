@@ -1,5 +1,5 @@
 import { Entity, ObjectIdColumn, ObjectID, Column, Index } from 'typeorm';
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsString, IsAlpha } from 'class-validator';
 
 export type Role = 'user' | 'staff' | 'admin';
 
@@ -9,9 +9,11 @@ export class User {
   id?: ObjectID;
 
   @Column()
+  @IsAlpha()
   firstName?: string;
 
   @Column()
+  @IsAlpha()
   lastName?: string;
 
   @Column()
