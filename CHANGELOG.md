@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/bymi15/JobTrackifyAPI/compare/v0.2.0...v0.2.1) (2020-10-01)
+
+
+### Features
+
+* **express:** log error for debugging ([5b843cc](https://github.com/bymi15/JobTrackifyAPI/commit/5b843cccd8d9ed197162e5e38d8156d77b681b9f))
+* **factories:** add userFactory function for saving test user data to db ([3b776f5](https://github.com/bymi15/JobTrackifyAPI/commit/3b776f53d9ecca79f2ad1c8e99633605814cabe2))
+* **tests:** add jest unit testing ([b76633f](https://github.com/bymi15/JobTrackifyAPI/commit/b76633f06498c1f88378b4afb7383cc8d09c87aa))
+* **tests:** add login, register unit tests for UserService ([4df9bc5](https://github.com/bymi15/JobTrackifyAPI/commit/4df9bc513ccab09aaae6eca7056258315611f5c7))
+* **User:** add validation for firstName and lastName ([d004c0e](https://github.com/bymi15/JobTrackifyAPI/commit/d004c0e915e83ef60ff1a154fcb104b1372acfcf))
+
 ## 0.2.0 (2020-09-28)
 
 
