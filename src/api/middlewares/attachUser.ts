@@ -1,10 +1,10 @@
 import { Container } from 'typedi';
 import { Logger } from 'winston';
 import { Response, NextFunction, Request } from 'express';
-import { User } from '../../entities/User';
-import UserService from '../../services/user';
+import { User } from '../entities/User';
+import UserService from '../services/user';
 
-const attachCurrentUser = async (
+const attachUser = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -25,4 +25,4 @@ const attachCurrentUser = async (
   }
 };
 
-export default attachCurrentUser;
+export default attachUser;

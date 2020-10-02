@@ -1,4 +1,3 @@
-// import config from './src/config';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const config = require('./src/config').default;
 
@@ -9,8 +8,8 @@ module.exports = {
   useUnifiedTopology: true,
   synchronize: true,
   logging: false,
-  entities: ['src/entities/**/*.ts'],
+  entities: ['src/api/entities/**/*.ts'],
   cli: {
-    entitiesDir: 'src/entities',
+    entitiesDir: 'src/api/entities',
   },
 };

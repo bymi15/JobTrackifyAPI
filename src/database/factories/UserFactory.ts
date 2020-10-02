@@ -1,5 +1,4 @@
-import { User, Role } from '../entities/User';
-import { getConnection } from 'typeorm';
+import { User, Role } from '../../api/entities/User';
 import bcrypt from 'bcrypt';
 import * as faker from 'faker';
 
@@ -20,6 +19,5 @@ export default async (data?: User): Promise<User> => {
     password,
     role: (data && data.role) || randomRole,
   });
-  await getConnection().getMongoRepository(User).save(user);
   return user;
 };

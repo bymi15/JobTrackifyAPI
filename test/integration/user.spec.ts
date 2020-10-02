@@ -1,19 +1,21 @@
 import { Container } from 'typedi';
-import { IUserInputDTO, IUserTokenObject } from '../../../src/interfaces/IUser';
-import UserService from '../../../src/services/user';
-import databaseLoader from '../../../src/loaders/database';
+import { IUserInputDTO, IUserTokenObject } from '../../src/types';
+import UserService from '../../src/api/services/user';
+import databaseLoader from '../../src/loaders/database';
 import * as faker from 'faker';
-import userFactory from '../../../src/factories/userFactory';
+import UserSeed from '../../src/database/seeds/UserSeed';
 import { Connection } from 'typeorm';
-import Logger from '../../../src/logger';
-jest.mock('../../../src/logger');
+import Logger from '../../src/logger';
+jest.mock('../../src/logger');
 
 describe('UserService', () => {
   let connection: Connection;
+  let userSeed: UserSeed;
   beforeAll(async (done) => {
     Container.reset();
     connection = await databaseLoader();
     await connection.synchronize(true);
+    userSeed = new UserSeed(connection);
     Container.set('logger', Logger);
     done();
   });
@@ -50,7 +52,7 @@ describe('UserService', () => {
     });
 
     test('Should fail to create a user record if the email exists', async () => {
-      const mockUser = await userFactory();
+      const mockUser = await userSeed.seedOne();
       const mockUserInput: IUserInputDTO = {
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
@@ -73,7 +75,9 @@ describe('UserService', () => {
   describe('login', () => {
     test('Should succeed with correct details', async () => {
       const mockPassword = faker.random.word();
-      const mockUser = await userFactory({ password: mockPassword });
+      const mockUser = await userSeed.seedOne({
+        password: mockPassword,
+      });
 
       const userServiceInstance = Container.get(UserService);
       const response = await userServiceInstance.login(
@@ -91,7 +95,9 @@ describe('UserService', () => {
     test('Should throw an error with incorrect details', async () => {
       const mockPassword = faker.random.word();
       const incorrectPassword = mockPassword + 'a';
-      const mockUser = await userFactory({ password: mockPassword });
+      const mockUser = await userSeed.seedOne({
+        password: mockPassword,
+      });
 
       const userServiceInstance = Container.get(UserService);
       let err: Error, response: IUserTokenObject;

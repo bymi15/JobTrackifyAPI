@@ -12,7 +12,6 @@ module.exports = {
   },
   rules: {
     'prettier/prettier': 'error',
-    'no-underscore-dangle': ['error', { allow: ['_id'] }],
     '@typescript-eslint/explicit-member-accessibility': 0,
     '@typescript-eslint/explicit-function-return-type': 0,
     '@typescript-eslint/no-parameter-properties': 0,
