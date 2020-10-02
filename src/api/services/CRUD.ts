@@ -21,11 +21,11 @@ export default class CRUD<Entity> {
     const errors = await validate(entity, {
       validationError: { target: false },
     });
-
     const foundCompany = await this.repo.findOne({
       [identifier]: entity[identifier],
     });
-    if (foundCompany) throw new Error('The company already exists');
+    if (foundCompany)
+      throw new Error(`The ${entity.constructor.name} already exists`);
 
     if (errors.length > 0) throw errors;
     return await this.repo.save(entity);
@@ -41,11 +41,16 @@ export default class CRUD<Entity> {
 
   async update(id: string, newEntity: Entity): Promise<Entity> {
     const entity = await this.findOne(id);
+    if (!entity) throw new Error('The id is invalid');
     Object.keys(newEntity).forEach((key) => {
       if (newEntity[key]) {
         entity[key] = newEntity[key];
       }
     });
+    const errors = await validate(entity, {
+      validationError: { target: false },
+    });
+    if (errors.length > 0) throw errors;
     return this.repo.save(entity);
   }
 
