@@ -1,5 +1,5 @@
 import { Entity, ObjectIdColumn, ObjectID, Column, Index } from 'typeorm';
-import { IsEmail, IsString, IsAlpha } from 'class-validator';
+import { IsEmail, IsString } from 'class-validator';
 
 export type Role = 'user' | 'staff' | 'admin';
 
@@ -9,11 +9,11 @@ export class User {
   id?: ObjectID;
 
   @Column()
-  @IsAlpha()
+  @IsString()
   firstName?: string;
 
   @Column()
-  @IsAlpha()
+  @IsString()
   lastName?: string;
 
   @Column()
@@ -39,7 +39,7 @@ export class User {
       this.lastName = data.lastName;
       this.email = data.email;
       this.password = data.password;
-      this.role = data.role || 'user';
+      this.role = data.role;
     }
   }
 }
