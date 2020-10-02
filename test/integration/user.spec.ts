@@ -1,5 +1,5 @@
 import { Container } from 'typedi';
-import { IUserInputDTO, IUserTokenObject } from '../../src/types';
+import { IUserInputDTO, IUserResponseDTO } from '../../src/types';
 import UserService from '../../src/api/services/user';
 import databaseLoader from '../../src/loaders/database';
 import * as faker from 'faker';
@@ -61,7 +61,7 @@ describe('UserService', () => {
       };
 
       const userServiceInstance = Container.get(UserService);
-      let err: Error, response: IUserTokenObject;
+      let err: Error, response: IUserResponseDTO;
       try {
         response = await userServiceInstance.register(mockUserInput);
       } catch (e) {
@@ -100,7 +100,7 @@ describe('UserService', () => {
       });
 
       const userServiceInstance = Container.get(UserService);
-      let err: Error, response: IUserTokenObject;
+      let err: Error, response: IUserResponseDTO;
       try {
         response = await userServiceInstance.login(
           mockUser.email,
