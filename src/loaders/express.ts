@@ -1,3 +1,5 @@
+import * as express from 'express';
+import * as path from 'path';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -18,6 +20,13 @@ export default (app: Application): void => {
   app.use(cors());
   app.use(helmet());
   app.use(bodyParser.json());
+
+  // Serve static files from the public folder
+  app.use(
+    express.static(path.join(__dirname, '..', 'public'), {
+      maxAge: 31557600000,
+    })
+  );
 
   // Load API routes
   app.use('/api', apiRoutes);
