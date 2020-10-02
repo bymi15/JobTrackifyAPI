@@ -16,6 +16,6 @@
     "noEmit": false,
     "esModuleInterop": true
   },
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "commands/seed.ts"],
   "exclude": ["node_modules", "test"]
 }
