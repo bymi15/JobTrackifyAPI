@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "set NODE_ENV=test&jest",
-    "test:unix": "NODE_ENV=test jest"
+    "test:unix": "NODE_ENV=test jest",
+    "seed": "ts-node -T commands/seed.ts"
   },
   "repository": {
     "type": "git",
@@ -66,6 +67,7 @@
     "@types/node": "^14.11.2",
     "@typescript-eslint/eslint-plugin": "^4.2.0",
     "@typescript-eslint/parser": "^4.2.0",
+    "commander": "^6.1.0",
     "eslint": "^7.9.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.22.0",
