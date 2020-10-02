@@ -8,26 +8,29 @@
     "build": "tsc -p .",
     "dev": "nodemon -V --exec ts-node src/app.ts",
     "release": "standard-version",
-    "mongodb": "start mkdirp .mongodb && mongod --dbpath .mongodb",
+    "mongodb": "mkdirp .mongodb && mongod --dbpath .mongodb",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "set NODE_ENV=test&jest",
-    "seed:config": "ts-node ./node_modules/typeorm-seeding/dist/cli.js config",
-    "seed:run": "ts-node ./node_modules/typeorm-seeding/dist/cli.js seed"
+    "test:unix": "NODE_ENV=test jest"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bymi15/JobTrackifyAPI.git"
+    "url": "git://github.com/bymi15/JobTrackifyAPI.git"
   },
   "keywords": [
     "javascript",
     "typescript",
     "node",
     "express",
+    "typeorm",
+    "typedi",
     "api",
     "rest",
     "mongodb"
   ],
   "author": "Brian Min",
-  "license": "ISC",
+  "license": "apache-2.0",
   "bugs": {
     "url": "https://github.com/bymi15/JobTrackifyAPI/issues"
   },

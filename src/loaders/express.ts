@@ -2,7 +2,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import { Application, NextFunction, Request, Response } from 'express';
-import apiRoutes from '../api';
+import apiRoutes from '../api/routes';
 import Logger from '../logger';
 import { ValidationError } from 'class-validator';
 
@@ -14,18 +14,9 @@ export default (app: Application): void => {
   app.head('/status', (req, res) => {
     res.status(200).end();
   });
-
-  // Useful if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
-  // It shows the real origin IP in the heroku or Cloudwatch logs
   app.enable('trust proxy');
-
-  // Enable Cross Origin Resource Sharing to all origins by default
   app.use(cors());
-
-  // Use Helmet to secure the app by setting various HTTP headers
   app.use(helmet());
-
-  // Middleware that transforms the raw string of req.body into json
   app.use(bodyParser.json());
 
   // Load API routes
@@ -49,7 +40,7 @@ export default (app: Application): void => {
   });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     Logger.error('Error: %o', err.message);
     if (err.name === 'UnauthorizedError') {
       /**
