@@ -11,12 +11,14 @@ jest.mock('../../src/logger');
 describe('UserService', () => {
   let connection: Connection;
   let userSeed: UserSeed;
+  let userServiceInstance: UserService;
   beforeAll(async (done) => {
     Container.reset();
     connection = await databaseLoader();
     await connection.synchronize(true);
     userSeed = new UserSeed(connection);
     Container.set('logger', Logger);
+    userServiceInstance = Container.get(UserService);
     done();
   });
 
@@ -40,8 +42,6 @@ describe('UserService', () => {
         email: faker.internet.email(),
         password: faker.random.word(),
       };
-
-      const userServiceInstance = Container.get(UserService);
       const response = await userServiceInstance.register(mockUserInput);
 
       expect(response).toBeDefined();
@@ -60,7 +60,6 @@ describe('UserService', () => {
         password: faker.random.word(),
       };
 
-      const userServiceInstance = Container.get(UserService);
       let err: Error, response: IUserResponseDTO;
       try {
         response = await userServiceInstance.register(mockUserInput);
@@ -79,7 +78,6 @@ describe('UserService', () => {
         password: mockPassword,
       });
 
-      const userServiceInstance = Container.get(UserService);
       const response = await userServiceInstance.login(
         mockUser.email,
         mockPassword
@@ -99,7 +97,6 @@ describe('UserService', () => {
         password: mockPassword,
       });
 
-      const userServiceInstance = Container.get(UserService);
       let err: Error, response: IUserResponseDTO;
       try {
         response = await userServiceInstance.login(
