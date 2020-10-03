@@ -3,20 +3,25 @@ import { IUserInputDTO, IUserResponseDTO } from '../../src/types';
 import UserService from '../../src/api/services/user';
 import databaseLoader from '../../src/loaders/database';
 import * as faker from 'faker';
-import UserSeed from '../../src/database/seeds/UserSeed';
 import { Connection } from 'typeorm';
 import Logger from '../../src/logger';
+import { User } from '../../src/api/entities/User';
+import EntitySeeder from '../../src/database/seeds/EntitySeed';
+import UserFactory from '../../src/database/factories/UserFactory';
 jest.mock('../../src/logger');
 
 describe('UserService', () => {
   let connection: Connection;
-  let userSeed: UserSeed;
+  let userSeed: EntitySeeder<User>;
   let userServiceInstance: UserService;
   beforeAll(async (done) => {
     Container.reset();
     connection = await databaseLoader();
     await connection.synchronize(true);
-    userSeed = new UserSeed(connection);
+    userSeed = new EntitySeeder<User>(
+      connection.getMongoRepository(User),
+      UserFactory
+    );
     Container.set('logger', Logger);
     userServiceInstance = Container.get(UserService);
     done();

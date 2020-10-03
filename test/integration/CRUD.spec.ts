@@ -1,23 +1,26 @@
 import { Container } from 'typedi';
 import CompanyService from '../../src/api/services/company';
 import databaseLoader from '../../src/loaders/database';
-import CompanySeed from '../../src/database/seeds/CompanySeed';
 import { Connection } from 'typeorm';
 import Logger from '../../src/logger';
 import CompanyFactory from '../../src/database/factories/CompanyFactory';
 import { Company } from '../../src/api/entities/Company';
 import CRUD from '../../src/api/services/CRUD';
+import EntitySeed from '../../src/database/seeds/EntitySeed';
 jest.mock('../../src/logger');
 
 describe('CRUD', () => {
   let connection: Connection;
-  let companySeed: CompanySeed;
+  let entitySeed: EntitySeed<Company>;
   let crudInstance: CRUD<Company>;
   beforeAll(async (done) => {
     Container.reset();
     connection = await databaseLoader();
     await connection.synchronize(true);
-    companySeed = new CompanySeed(connection);
+    entitySeed = new EntitySeed<Company>(
+      connection.getMongoRepository(Company),
+      CompanyFactory
+    );
     Container.set('logger', Logger);
     crudInstance = new CRUD(Container.get(CompanyService).getRepo(), Logger);
     done();
@@ -46,7 +49,7 @@ describe('CRUD', () => {
     });
 
     test('Should fail to create an entity if the value for the provided identifier already exists', async () => {
-      const existingCompany = await companySeed.seedOne();
+      const existingCompany = await entitySeed.seedOne();
       let err: Error, response: Company;
       try {
         response = await crudInstance.create(existingCompany, 'name');
@@ -62,7 +65,7 @@ describe('CRUD', () => {
 
   describe('find', () => {
     test('Should find all the entities', async () => {
-      const mockCompanies = await companySeed.seedMany(5);
+      const mockCompanies = await entitySeed.seedMany(5);
       const response = await crudInstance.find();
 
       expect(response).toBeDefined();
@@ -72,7 +75,7 @@ describe('CRUD', () => {
 
   describe('findOne', () => {
     test('Should find an entity with a valid id', async () => {
-      const mockCompanies = await companySeed.seedMany(5);
+      const mockCompanies = await entitySeed.seedMany(5);
       const response = await crudInstance.findOne(
         mockCompanies[0].id.toHexString()
       );
@@ -91,7 +94,7 @@ describe('CRUD', () => {
 
   describe('update', () => {
     test('Should update an entity with a valid id', async () => {
-      const mockCompany = await companySeed.seedOne();
+      const mockCompany = await entitySeed.seedOne();
       const updateCompany = new Company({
         name: 'updatedCompanyName',
         description: 'updatedCompanyDescription',
@@ -125,7 +128,7 @@ describe('CRUD', () => {
 
   describe('delete', () => {
     test('Should delete an entity if id exists', async () => {
-      const mockCompany = await companySeed.seedOne();
+      const mockCompany = await entitySeed.seedOne();
       const response = await crudInstance.delete(mockCompany.id.toHexString());
       const foundCompany = await crudInstance.findOne(
         mockCompany.id.toHexString()

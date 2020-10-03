@@ -1,22 +1,25 @@
 import { Container } from 'typedi';
 import CompanyService from '../../src/api/services/company';
 import databaseLoader from '../../src/loaders/database';
-import CompanySeed from '../../src/database/seeds/CompanySeed';
 import { Connection } from 'typeorm';
 import Logger from '../../src/logger';
 import CompanyFactory from '../../src/database/factories/CompanyFactory';
 import { Company } from '../../src/api/entities/Company';
+import EntitySeed from '../../src/database/seeds/EntitySeed';
 jest.mock('../../src/logger');
 
 describe('CompanyService', () => {
   let connection: Connection;
-  let companySeed: CompanySeed;
+  let companySeed: EntitySeed<Company>;
   let companyServiceInstance: CompanyService;
   beforeAll(async (done) => {
     Container.reset();
     connection = await databaseLoader();
     await connection.synchronize(true);
-    companySeed = new CompanySeed(connection);
+    companySeed = new EntitySeed<Company>(
+      connection.getMongoRepository(Company),
+      CompanyFactory
+    );
     Container.set('logger', Logger);
     companyServiceInstance = Container.get(CompanyService);
     done();

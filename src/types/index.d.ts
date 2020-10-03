@@ -12,6 +12,8 @@ declare global {
 
 export type Token = jwt.Options;
 
+export type Factory<Entity> = (data?: Entity) => Promise<Entity> | Entity;
+
 export interface IUserInputDTO {
   firstName: string;
   lastName: string;
