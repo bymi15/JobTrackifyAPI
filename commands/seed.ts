@@ -1,7 +1,10 @@
 import commander from 'commander';
 import databaseLoader from '../src/loaders/database';
-import CompanySeed from '../src/database/seeds/CompanySeed';
-import UserSeed from '../src/database/seeds/UserSeed';
+import EntitySeed from '../src/database/seeds/EntitySeed';
+import { User } from '../src/api/entities/User';
+import { Company } from '../src/api/entities/Company';
+import CompanyFactory from '../src/database/factories/CompanyFactory';
+import UserFactory from '../src/database/factories/UserFactory';
 
 commander
   .version('1.0.0')
@@ -16,12 +19,16 @@ const run = async () => {
     const connection = await databaseLoader();
     log('Database connection loaded successfully!');
 
-    const users = await new UserSeed(connection).seedMany(commander.user);
+    const users = await new EntitySeed(
+      connection.getMongoRepository(User),
+      UserFactory
+    ).seedMany(commander.user);
     log(`${users.length} users created!`);
 
-    const companies = await new CompanySeed(connection).seedMany(
-      commander.company
-    );
+    const companies = await new EntitySeed(
+      connection.getMongoRepository(Company),
+      CompanyFactory
+    ).seedMany(commander.company);
     log(`${companies.length} companies created!`);
   } catch (err) {
     handleError(err);
