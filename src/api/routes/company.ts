@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Container } from 'typedi';
 import { celebrate, Joi } from 'celebrate';
-import CompanyService from '../services/company';
+import CompanyService from '../services/CompanyService';
 import { Logger } from 'winston';
 import { Company } from '../entities/Company';
 import { isAuth } from '../middlewares';
