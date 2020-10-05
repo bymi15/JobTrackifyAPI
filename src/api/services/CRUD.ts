@@ -21,10 +21,10 @@ export default class CRUD<Entity> {
     const errors = await validate(entity, {
       validationError: { target: false },
     });
-    const foundCompany = await this.repo.findOne({
+    const foundEntity = await this.repo.findOne({
       [identifier]: entity[identifier],
     });
-    if (foundCompany)
+    if (foundEntity)
       throw new Error(`The ${entity.constructor.name} already exists`);
 
     if (errors.length > 0) throw errors;

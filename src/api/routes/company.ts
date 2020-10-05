@@ -43,7 +43,7 @@ route.delete('/:id', isAuth, async (req, res, next) => {
   try {
     const companyServiceInstance = Container.get(CompanyService);
     await companyServiceInstance.delete(companyId);
-    return res.json({}).status(200);
+    return res.json({}).status(204);
   } catch (e) {
     return next(e);
   }
@@ -111,7 +111,7 @@ route.put(
         companyId,
         new Company(req.body)
       );
-      return res.status(201).json({ company });
+      return res.status(200).json({ company });
     } catch (e) {
       return next(e);
     }
