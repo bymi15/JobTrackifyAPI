@@ -23,7 +23,10 @@ export class Company {
   website?: string;
 
   @Column()
-  headquarters?: { city?: string; country?: string };
+  headquarters?: {
+    city?: string;
+    country?: string;
+  };
 
   @Column()
   @IsString()
