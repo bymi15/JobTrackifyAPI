@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { Service } from 'typedi';
-import { MongoRepository } from 'typeorm';
+import { MongoRepository, ObjectID } from 'typeorm';
 import { Logger } from 'winston';
 import { validate } from 'class-validator';
 
@@ -17,13 +18,32 @@ export default class CRUD<Entity> {
     return this.repo;
   }
 
-  async create(entity: Entity, identifier: string): Promise<Entity> {
+  protected async fillObjectIdField(
+    entity: Entity,
+    fieldName: string,
+    fieldEntityService: CRUD<any>
+  ): Promise<void> {
+    const entityName = entity.constructor.name;
+    if (!entity) throw new Error(`${entityName} not found`);
+    if (!(fieldName in entity))
+      throw new Error(`${fieldName} does not exist in ${entityName}`);
+    entity[fieldName] = await fieldEntityService.findOne(
+      <ObjectID>entity[fieldName]
+    );
+    if (!entity[fieldName]) {
+      throw new Error(`Invalid ${fieldName}`);
+    }
+  }
+
+  async create(entity: Entity, identifier?: string): Promise<Entity> {
     const errors = await validate(entity, {
       validationError: { target: false },
     });
-    const foundEntity = await this.repo.findOne({
-      [identifier]: entity[identifier],
-    });
+    const foundEntity =
+      identifier &&
+      (await this.repo.findOne({
+        [identifier]: entity[identifier],
+      }));
     if (foundEntity)
       throw new Error(`The ${entity.constructor.name} already exists`);
 
@@ -35,11 +55,11 @@ export default class CRUD<Entity> {
     return await this.repo.find();
   }
 
-  async findOne(id: string): Promise<Entity | undefined> {
+  async findOne(id: string | ObjectID): Promise<Entity | undefined> {
     return await this.repo.findOne(id);
   }
 
-  async update(id: string, newEntity: Entity): Promise<Entity> {
+  async update(id: string | ObjectID, newEntity: Entity): Promise<Entity> {
     const entity = await this.findOne(id);
     if (!entity) throw new Error('The id is invalid');
     Object.keys(newEntity).forEach((key) => {
