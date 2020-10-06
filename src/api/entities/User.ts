@@ -39,7 +39,12 @@ export class User {
       this.lastName = data.lastName;
       this.email = data.email;
       this.password = data.password;
-      this.role = data.role;
+      this.role = data.role || this.role;
     }
+  }
+
+  public hasAccessTo?(role: Role): boolean {
+    const roles = ['user', 'staff', 'admin'];
+    return roles.indexOf(this.role) >= roles.indexOf(role);
   }
 }
