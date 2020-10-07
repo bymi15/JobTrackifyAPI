@@ -43,15 +43,19 @@ export default class BoardService extends CRUD<Board> {
     return boards;
   }
 
-  async findOne(id: string): Promise<Board | undefined> {
+  async findOne(id: string | ObjectID): Promise<Board | undefined> {
     const board = await super.findOne(id);
-    await this.fillOwnerWithUser(board);
+    if (board) {
+      await this.fillOwnerWithUser(board);
+    }
     return board;
   }
 
-  async update(id: string, board: Board): Promise<Board> {
+  async update(id: string | ObjectID, board: Board): Promise<Board> {
     const updatedBoard = await super.update(id, board);
-    await this.fillOwnerWithUser(updatedBoard);
+    if (updatedBoard) {
+      await this.fillOwnerWithUser(updatedBoard);
+    }
     return updatedBoard;
   }
 }
