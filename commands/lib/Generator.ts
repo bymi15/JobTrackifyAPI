@@ -437,7 +437,7 @@ export default class Generator {
   public generateRoute = async (): Promise<string> => {
     const fields = this.fields || (await this.readEntityFields());
     const filePath: string =
-      this.routePath + camelCase(this.entityName) + '.ts';
+      this.routePath + camelCase(pluralizeLastWord(this.entityName)) + '.ts';
     await fs.writeFile(filePath, this.routeCode(fields));
     return filePath;
   };
