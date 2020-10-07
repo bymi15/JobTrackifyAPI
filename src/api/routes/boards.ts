@@ -5,6 +5,7 @@ import BoardService from '../services/BoardService';
 import { Logger } from 'winston';
 import { Board } from '../entities/Board';
 import { attachUser, isAuth } from '../middlewares';
+import { User } from '../entities/User';
 
 const route = Router();
 
@@ -41,8 +42,9 @@ route.delete('/:id', isAuth, async (req, res, next) => {
   );
   try {
     const boardServiceInstance = Container.get(BoardService);
-    const board = await boardServiceInstance.findOne(req.params.id);
-    if (board.owner !== req.currentUser.id) return res.sendStatus(403);
+    const boardUser = (await boardServiceInstance.findOne(req.params.id))
+      .owner as User;
+    if (!boardUser.id.equals(req.currentUser.id)) return res.sendStatus(403);
     await boardServiceInstance.delete(req.params.id);
     return res.json({}).status(204);
   } catch (e) {
@@ -87,8 +89,9 @@ route.put(
     logger.debug('Calling PUT to /board/:id endpoint with body: %o', req.body);
     try {
       const boardServiceInstance = Container.get(BoardService);
-      const board = await boardServiceInstance.findOne(req.params.id);
-      if (board.owner !== req.currentUser.id) return res.sendStatus(403);
+      const boardUser = (await boardServiceInstance.findOne(req.params.id))
+        .owner as User;
+      if (!boardUser.id.equals(req.currentUser.id)) return res.sendStatus(403);
       req.body.owner = req.currentUser.id;
 
       const updatedBoard = await boardServiceInstance.update(

@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import auth from './auth';
-import user from './user';
-import company from './company';
-import board from './board';
+import users from './users';
+import companies from './companies';
+import boards from './boards';
 
 const routes = Router();
 
 routes.use('/auth', auth);
-routes.use('/user', user);
-routes.use('/company', company);
-routes.use('/board', board);
+routes.use('/users', users);
+routes.use('/companies', companies);
+routes.use('/boards', boards);
 
 export default routes;
