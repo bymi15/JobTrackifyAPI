@@ -213,7 +213,7 @@ export default class Generator {
       this.routeFunctionHeader('get', '/') +
       "  const logger: Logger = Container.get('logger');\n" +
       `  logger.debug('Calling GET to /${camelCase(
-        this.entityName
+        pluralizeLastWord(this.entityName)
       )} endpoint');\n` +
       '  try {\n' +
       `    const ${camelCase(this.entityName)}ServiceInstance = Container.get(${
@@ -233,7 +233,7 @@ export default class Generator {
       this.routeFunctionHeader('get', '/:id') +
       "  const logger: Logger = Container.get('logger');\n" +
       `  logger.debug('Calling GET to /${camelCase(
-        this.entityName
+        pluralizeLastWord(this.entityName)
       )}/:id endpoint with id: %s', req.params.id);\n` +
       '  try {\n' +
       `    const ${camelCase(this.entityName)}ServiceInstance = Container.get(${
@@ -251,7 +251,7 @@ export default class Generator {
       this.routeFunctionHeader('delete', '/:id') +
       "  const logger: Logger = Container.get('logger');\n" +
       `  logger.debug('Calling DELETE to /${camelCase(
-        this.entityName
+        pluralizeLastWord(this.entityName)
       )}/:id endpoint with id: %s', req.params.id);\n` +
       '  try {\n' +
       `    const ${camelCase(this.entityName)}ServiceInstance = Container.get(${
@@ -273,7 +273,7 @@ export default class Generator {
       ) +
       "    const logger: Logger = Container.get('logger');\n" +
       `    logger.debug('Calling POST to /${camelCase(
-        this.entityName
+        pluralizeLastWord(this.entityName)
       )}/:id endpoint with body: %o', req.body);\n` +
       '    try {\n' +
       `      const ${camelCase(
@@ -293,7 +293,7 @@ export default class Generator {
       this.routeFunctionHeader('put', '/:id', this.routeValidation(fields)) +
       "    const logger: Logger = Container.get('logger');\n" +
       `    logger.debug('Calling PUT to /${camelCase(
-        this.entityName
+        pluralizeLastWord(this.entityName)
       )}/:id endpoint with body: %o', req.body);\n` +
       '    try {\n' +
       `      const ${camelCase(
