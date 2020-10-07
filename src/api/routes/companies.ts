@@ -10,7 +10,7 @@ const route = Router();
 
 route.get('/', isAuth, async (req, res, next) => {
   const logger: Logger = Container.get('logger');
-  logger.debug('Calling GET to /company endpoint');
+  logger.debug('Calling GET to /companies endpoint');
   try {
     const companyServiceInstance = Container.get(CompanyService);
     const companies = await companyServiceInstance.find();
@@ -23,7 +23,7 @@ route.get('/', isAuth, async (req, res, next) => {
 route.get('/:id', isAuth, async (req, res, next) => {
   const companyId = req.params.id;
   const logger: Logger = Container.get('logger');
-  logger.debug('Calling GET to /company/:id endpoint with id: %s', companyId);
+  logger.debug('Calling GET to /companies/:id endpoint with id: %s', companyId);
   try {
     const companyServiceInstance = Container.get(CompanyService);
     const company = await companyServiceInstance.findOne(companyId);
@@ -37,7 +37,7 @@ route.delete('/:id', isAuth, checkRole('staff'), async (req, res, next) => {
   const companyId = req.params.id;
   const logger: Logger = Container.get('logger');
   logger.debug(
-    'Calling DELETE to /company/:id endpoint with id: %s',
+    'Calling DELETE to /companies/:id endpoint with id: %s',
     companyId
   );
   try {
@@ -104,7 +104,7 @@ route.put(
     const companyId = req.params.id;
     const logger: Logger = Container.get('logger');
     logger.debug(
-      'Calling PUT to /company/:id endpoint with body: %o',
+      'Calling PUT to /companies/:id endpoint with body: %o',
       req.body
     );
     try {

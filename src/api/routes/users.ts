@@ -12,7 +12,7 @@ route.get(
   checkRole('admin'),
   async (_req: Request, res: Response, next: NextFunction) => {
     const logger: Logger = Container.get('logger');
-    logger.debug('Calling GET to /user endpoint');
+    logger.debug('Calling GET to /users endpoint');
     try {
       const userServiceInstance = Container.get(UserService);
       const users = await userServiceInstance.find();
@@ -25,7 +25,7 @@ route.get(
 
 route.get('/current', isAuth, attachUser, (req: Request, res: Response) => {
   const logger: Logger = Container.get('logger');
-  logger.debug('Calling GET to /user/current endpoint');
+  logger.debug('Calling GET to /users/current endpoint');
   return res.json(req.currentUser).status(200);
 });
 
@@ -35,7 +35,7 @@ route.get(
   checkRole('staff'),
   async (req: Request, res: Response, next: NextFunction) => {
     const logger: Logger = Container.get('logger');
-    logger.debug('Calling GET to /user/:id endpoint');
+    logger.debug('Calling GET to /users/:id endpoint');
     try {
       const userServiceInstance = Container.get(UserService);
       const user = await userServiceInstance.findOne(req.params.id);
