@@ -4,14 +4,32 @@ import { celebrate, Joi } from 'celebrate';
 import BoardService from '../services/BoardService';
 import { Logger } from 'winston';
 import { Board } from '../entities/Board';
-import { attachUser, isAuth } from '../middlewares';
+import { attachUser, checkRole, isAuth } from '../middlewares';
 import { User } from '../entities/User';
 
 const route = Router();
 
-route.get('/', isAuth, attachUser, async (req, res, next) => {
+route.get(
+  '/',
+  isAuth,
+  attachUser,
+  checkRole('admin'),
+  async (req, res, next) => {
+    const logger: Logger = Container.get('logger');
+    logger.debug('Calling GET to /boards endpoint');
+    try {
+      const boardServiceInstance = Container.get(BoardService);
+      const boards = await boardServiceInstance.find();
+      return res.json(boards).status(200);
+    } catch (e) {
+      return next(e);
+    }
+  }
+);
+
+route.get('/user', isAuth, attachUser, async (req, res, next) => {
   const logger: Logger = Container.get('logger');
-  logger.debug('Calling GET to /board endpoint');
+  logger.debug('Calling GET to /boards/user endpoint');
   try {
     const boardServiceInstance = Container.get(BoardService);
     const boards = await boardServiceInstance.findByOwner(req.currentUser.id);
@@ -23,7 +41,10 @@ route.get('/', isAuth, attachUser, async (req, res, next) => {
 
 route.get('/:id', isAuth, async (req, res, next) => {
   const logger: Logger = Container.get('logger');
-  logger.debug('Calling GET to /board/:id endpoint with id: %s', req.params.id);
+  logger.debug(
+    'Calling GET to /boards/:id endpoint with id: %s',
+    req.params.id
+  );
   try {
     const boardServiceInstance = Container.get(BoardService);
     const board = await boardServiceInstance.findOne(req.params.id);
@@ -37,7 +58,7 @@ route.get('/:id', isAuth, async (req, res, next) => {
 route.delete('/:id', isAuth, async (req, res, next) => {
   const logger: Logger = Container.get('logger');
   logger.debug(
-    'Calling DELETE to /board/:id endpoint with id: %s',
+    'Calling DELETE to /boards/:id endpoint with id: %s',
     req.params.id
   );
   try {
@@ -63,7 +84,10 @@ route.post(
   }),
   async (req, res, next) => {
     const logger: Logger = Container.get('logger');
-    logger.debug('Calling POST to /board/:id endpoint with body: %o', req.body);
+    logger.debug(
+      'Calling POST to /boards/:id endpoint with body: %o',
+      req.body
+    );
     try {
       const boardServiceInstance = Container.get(BoardService);
       req.body.owner = req.currentUser.id;
@@ -86,7 +110,7 @@ route.put(
   }),
   async (req, res, next) => {
     const logger: Logger = Container.get('logger');
-    logger.debug('Calling PUT to /board/:id endpoint with body: %o', req.body);
+    logger.debug('Calling PUT to /boards/:id endpoint with body: %o', req.body);
     try {
       const boardServiceInstance = Container.get(BoardService);
       const boardUser = (await boardServiceInstance.findOne(req.params.id))
