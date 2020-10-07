@@ -66,7 +66,7 @@ export default class UserService extends CRUD<User> {
     throw new Error('Invalid email or password');
   }
 
-  generateToken(userRecord: User): string {
+  private generateToken(userRecord: User): string {
     const today = new Date();
     const exp = new Date(today);
     exp.setDate(today.getDate() + 7);
