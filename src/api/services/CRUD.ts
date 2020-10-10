@@ -3,6 +3,7 @@ import { Service } from 'typedi';
 import { MongoRepository, ObjectID } from 'typeorm';
 import { Logger } from 'winston';
 import { validate } from 'class-validator';
+import { ErrorHandler } from '../../helpers/ErrorHandler';
 
 @Service()
 export default class CRUD<Entity> {
@@ -31,7 +32,7 @@ export default class CRUD<Entity> {
       <ObjectID>entity[fieldName]
     );
     if (!entity[fieldName]) {
-      throw new Error(`Invalid ${fieldName}`);
+      throw new ErrorHandler(500, `Invalid ${fieldName}`);
     }
   }
 
@@ -45,7 +46,10 @@ export default class CRUD<Entity> {
         [identifier]: entity[identifier],
       }));
     if (foundEntity)
-      throw new Error(`The ${entity.constructor.name} already exists`);
+      throw new ErrorHandler(
+        500,
+        `The ${entity.constructor.name} already exists`
+      );
 
     if (errors.length > 0) throw errors;
     return await this.repo.save(entity);
