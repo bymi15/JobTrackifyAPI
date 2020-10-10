@@ -42,7 +42,7 @@ export default class UserService extends CRUD<User> {
     if (errors.length > 0) throw errors;
     const foundUser = await this.userRepo.findOne({ email: newUser.email });
     if (foundUser)
-      throw new ErrorHandler(500, 'The email address already exists');
+      throw new ErrorHandler(400, 'The email address already exists');
 
     const userRecord: User = await this.userRepo.save(newUser);
     if (!userRecord) throw new ErrorHandler(500, 'User cannot be created');
