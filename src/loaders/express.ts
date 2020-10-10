@@ -8,6 +8,7 @@ import apiRoutes from '../api/routes';
 import Logger from '../logger';
 import { ValidationError } from 'class-validator';
 import { ErrorHandler, handleError } from '../helpers/ErrorHandler';
+import { isCelebrateError } from 'celebrate';
 
 export default (app: Application): void => {
   // Health Check endpoints
@@ -34,7 +35,10 @@ export default (app: Application): void => {
 
   /// Error handlers
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    if (err instanceof Array && err[0] instanceof ValidationError) {
+    if (isCelebrateError(err)) {
+      Logger.error('Error: %o', err);
+      res.status(400).json({ error: 'Invalid data' }).end();
+    } else if (err instanceof Array && err[0] instanceof ValidationError) {
       const messageArr: Array<string> = [];
       let e: ValidationError;
       for (e of err) {
