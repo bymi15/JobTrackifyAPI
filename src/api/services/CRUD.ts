@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Service } from 'typedi';
-import { MongoRepository, ObjectID } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import { Logger } from 'winston';
 import { validate } from 'class-validator';
 import { ErrorHandler } from '../../helpers/ErrorHandler';
@@ -31,9 +31,7 @@ export default class CRUD<Entity> {
         500,
         `${fieldName} does not exist in ${entityName}`
       );
-    entity[fieldName] = await fieldEntityService.findOne(
-      <ObjectID>entity[fieldName]
-    );
+    entity[fieldName] = await fieldEntityService.findOne(entity[fieldName]);
     if (!entity[fieldName]) {
       throw new ErrorHandler(500, `Invalid ${fieldName}`);
     }
@@ -66,7 +64,7 @@ export default class CRUD<Entity> {
     throw new ErrorHandler(404, 'Not found');
   }
 
-  async findOne(id: string | ObjectID): Promise<Entity | undefined> {
+  async findOne(id: string): Promise<Entity | undefined> {
     const entity = await this.repo.findOne(id);
     if (entity) {
       return entity;
@@ -74,7 +72,7 @@ export default class CRUD<Entity> {
     throw new ErrorHandler(404, 'Not found');
   }
 
-  async update(id: string | ObjectID, newEntity: Entity): Promise<Entity> {
+  async update(id: string, newEntity: Entity): Promise<Entity> {
     const entity = await this.repo.findOne(id);
     if (!entity) throw new ErrorHandler(500, 'The id is invalid');
     Object.keys(newEntity).forEach((key) => {
