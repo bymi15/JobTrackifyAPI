@@ -25,9 +25,12 @@ export default class CRUD<Entity> {
     fieldEntityService: CRUD<any>
   ): Promise<void> {
     const entityName = entity.constructor.name;
-    if (!entity) throw new Error(`${entityName} not found`);
+    if (!entity) throw new ErrorHandler(500, `${entityName} not found`);
     if (!(fieldName in entity))
-      throw new Error(`${fieldName} does not exist in ${entityName}`);
+      throw new ErrorHandler(
+        500,
+        `${fieldName} does not exist in ${entityName}`
+      );
     entity[fieldName] = await fieldEntityService.findOne(
       <ObjectID>entity[fieldName]
     );
@@ -47,7 +50,7 @@ export default class CRUD<Entity> {
       }));
     if (foundEntity)
       throw new ErrorHandler(
-        500,
+        400,
         `The ${entity.constructor.name} already exists`
       );
 
@@ -56,16 +59,24 @@ export default class CRUD<Entity> {
   }
 
   async find(): Promise<Entity[]> {
-    return await this.repo.find();
+    const entities = await this.repo.find();
+    if (entities) {
+      return entities;
+    }
+    throw new ErrorHandler(404, 'Not found');
   }
 
   async findOne(id: string | ObjectID): Promise<Entity | undefined> {
-    return await this.repo.findOne(id);
+    const entity = await this.repo.findOne(id);
+    if (entity) {
+      return entity;
+    }
+    throw new ErrorHandler(404, 'Not found');
   }
 
   async update(id: string | ObjectID, newEntity: Entity): Promise<Entity> {
     const entity = await this.repo.findOne(id);
-    if (!entity) throw new Error('The id is invalid');
+    if (!entity) throw new ErrorHandler(500, 'The id is invalid');
     Object.keys(newEntity).forEach((key) => {
       if (newEntity[key]) {
         entity[key] = newEntity[key];
