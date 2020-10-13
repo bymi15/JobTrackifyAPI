@@ -6,19 +6,20 @@ import * as faker from 'faker';
 import { Connection } from 'typeorm';
 import Logger from '../../src/logger';
 import { User } from '../../src/api/entities/User';
-import EntitySeeder from '../../src/database/seeds/EntitySeed';
+import EntitySeed from '../../src/database/seeds/EntitySeed';
 import UserFactory from '../../src/database/factories/UserFactory';
+import { ErrorHandler } from '../../src/helpers/ErrorHandler';
 jest.mock('../../src/logger');
 
 describe('UserService', () => {
   let connection: Connection;
-  let userSeed: EntitySeeder<User>;
+  let userSeed: EntitySeed<User>;
   let userServiceInstance: UserService;
   beforeAll(async () => {
     Container.reset();
     connection = await databaseLoader();
     await connection.synchronize(true);
-    userSeed = new EntitySeeder<User>(
+    userSeed = new EntitySeed<User>(
       connection.getMongoRepository(User),
       UserFactory
     );
@@ -60,14 +61,16 @@ describe('UserService', () => {
         email: mockUser.email,
         password: faker.random.word(),
       };
-      let err: Error, response: IUserResponseDTO;
+      let err: ErrorHandler, response: IUserResponseDTO;
       try {
         response = await userServiceInstance.register(mockUserInput);
       } catch (e) {
         err = e;
       }
       expect(response).toBeUndefined();
-      expect(err).toEqual(new Error('The email address already exists'));
+      expect(err).toEqual(
+        new ErrorHandler(400, 'The email address already exists')
+      );
     });
   });
 
@@ -94,7 +97,7 @@ describe('UserService', () => {
       const mockUser = await userSeed.seedOne({
         password: mockPassword,
       });
-      let err: Error, response: IUserResponseDTO;
+      let err: ErrorHandler, response: IUserResponseDTO;
       try {
         response = await userServiceInstance.login(
           mockUser.email,
@@ -104,7 +107,7 @@ describe('UserService', () => {
         err = e;
       }
       expect(response).toBeUndefined();
-      expect(err).toEqual(new Error('Invalid email or password'));
+      expect(err).toEqual(new ErrorHandler(401, 'Invalid email or password'));
     });
   });
 });
