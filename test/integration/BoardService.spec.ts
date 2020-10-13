@@ -9,6 +9,7 @@ import { Board } from '../../src/api/entities/Board';
 import BoardSeed from '../../src/database/seeds/BoardSeed';
 import EntitySeed from '../../src/database/seeds/EntitySeed';
 import { User } from '../../src/api/entities/User';
+import { ErrorHandler } from '../../src/helpers/ErrorHandler';
 jest.mock('../../src/logger');
 
 describe('BoardService', () => {
@@ -94,17 +95,25 @@ describe('BoardService', () => {
   describe('findOne', () => {
     test('Should successfully find a board by id', async () => {
       const boards: Board[] = await boardSeed.seedMany(5);
-      const response = await boardServiceInstance.findOne(boards[1].id);
+      const response = await boardServiceInstance.findOne(
+        boards[1].id.toHexString()
+      );
       expect(response).toBeDefined();
       expect(response.id).toEqual(boards[1].id);
       expect(response.title).toEqual(boards[1].title);
       expect(response.owner).toEqual(mockUser);
     });
 
-    test('Should return undefined with invalid id', async () => {
-      const mockBoard = BoardFactory();
-      const response = await boardServiceInstance.findOne(mockBoard.id);
+    test('Should return not found error with invalid id', async () => {
+      const mockBoardId = '22dba00215a1568fe9310409';
+      let err: Error, response: Board;
+      try {
+        response = await boardServiceInstance.findOne(mockBoardId);
+      } catch (e) {
+        err = e;
+      }
       expect(response).toBeUndefined();
+      expect(err).toEqual(new ErrorHandler(404, 'Not found'));
     });
   });
 
@@ -113,7 +122,7 @@ describe('BoardService', () => {
       const board = await boardSeed.seedOne();
       const mockNewBoard = BoardFactory({ owner: board.owner });
       const response = await boardServiceInstance.update(
-        board.id,
+        board.id.toHexString(),
         mockNewBoard
       );
       expect(response).toBeDefined();
@@ -125,7 +134,7 @@ describe('BoardService', () => {
       const board = await boardSeed.seedOne();
       const mockNewBoard = new Board({ title: 'newTitle' });
       const response = await boardServiceInstance.update(
-        board.id,
+        board.id.toHexString(),
         mockNewBoard
       );
       expect(response).toBeDefined();
