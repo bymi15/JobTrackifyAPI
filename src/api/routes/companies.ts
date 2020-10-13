@@ -43,7 +43,7 @@ route.delete('/:id', isAuth, checkRole('staff'), async (req, res, next) => {
   try {
     const companyServiceInstance = Container.get(CompanyService);
     await companyServiceInstance.delete(companyId);
-    return res.json({}).status(204);
+    return res.status(204).end();
   } catch (e) {
     return next(e);
   }
@@ -56,15 +56,15 @@ route.post(
   celebrate({
     body: Joi.object({
       name: Joi.string().required(),
-      description: Joi.string().required(),
-      logo: Joi.string().required(),
-      website: Joi.string().required(),
+      description: Joi.string(),
+      logo: Joi.string(),
+      website: Joi.string(),
       headquarters: Joi.object({
-        city: Joi.string().required(),
-        country: Joi.string().required(),
-      }).required(),
-      industry: Joi.string().required(),
-      foundedYear: Joi.string().required(),
+        city: Joi.string(),
+        country: Joi.string(),
+      }),
+      industry: Joi.string(),
+      foundedYear: Joi.string(),
     }),
   }),
   async (req, res, next) => {
