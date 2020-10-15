@@ -41,6 +41,7 @@ export default class CRUD<Entity> {
     const errors = await validate(entity, {
       validationError: { target: false },
     });
+    if (errors.length > 0) throw errors;
     const foundEntity =
       identifier &&
       (await this.repo.findOne({
@@ -51,8 +52,6 @@ export default class CRUD<Entity> {
         400,
         `The ${entity.constructor.name} already exists`
       );
-
-    if (errors.length > 0) throw errors;
     return await this.repo.save(entity);
   }
 
