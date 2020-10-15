@@ -20,7 +20,7 @@ route.get(
     try {
       const boardServiceInstance = Container.get(BoardService);
       const boards = await boardServiceInstance.find();
-      return res.json(boards).status(200);
+      return res.status(200).json(boards);
     } catch (e) {
       return next(e);
     }
@@ -33,13 +33,13 @@ route.get('/user', isAuth, attachUser, async (req, res, next) => {
   try {
     const boardServiceInstance = Container.get(BoardService);
     const boards = await boardServiceInstance.findByOwner(req.currentUser.id);
-    return res.json(boards).status(200);
+    return res.status(200).json(boards);
   } catch (e) {
     return next(e);
   }
 });
 
-route.get('/:id', isAuth, async (req, res, next) => {
+route.get('/:id', isAuth, attachUser, async (req, res, next) => {
   const logger: Logger = Container.get('logger');
   logger.debug(
     'Calling GET to /boards/:id endpoint with id: %s',
@@ -48,14 +48,19 @@ route.get('/:id', isAuth, async (req, res, next) => {
   try {
     const boardServiceInstance = Container.get(BoardService);
     const board = await boardServiceInstance.findOne(req.params.id);
-    if (board.owner !== req.currentUser.id) return res.sendStatus(403);
-    return res.json(board).status(200);
+    if (
+      req.currentUser.role !== 'admin' &&
+      !(board.owner as User).id.equals(req.currentUser.id)
+    ) {
+      return res.sendStatus(403);
+    }
+    return res.status(200).json(board);
   } catch (e) {
     return next(e);
   }
 });
 
-route.delete('/:id', isAuth, async (req, res, next) => {
+route.delete('/:id', isAuth, attachUser, async (req, res, next) => {
   const logger: Logger = Container.get('logger');
   logger.debug(
     'Calling DELETE to /boards/:id endpoint with id: %s',
@@ -63,11 +68,16 @@ route.delete('/:id', isAuth, async (req, res, next) => {
   );
   try {
     const boardServiceInstance = Container.get(BoardService);
-    const boardUser = (await boardServiceInstance.findOne(req.params.id))
+    const boardOwner = (await boardServiceInstance.findOne(req.params.id))
       .owner as User;
-    if (!boardUser.id.equals(req.currentUser.id)) return res.sendStatus(403);
+    if (
+      req.currentUser.role !== 'admin' &&
+      !boardOwner.id.equals(req.currentUser.id)
+    ) {
+      return res.sendStatus(403);
+    }
     await boardServiceInstance.delete(req.params.id);
-    return res.json({}).status(204);
+    return res.status(204).end();
   } catch (e) {
     return next(e);
   }
@@ -92,7 +102,7 @@ route.post(
       const boardServiceInstance = Container.get(BoardService);
       req.body.owner = req.currentUser.id;
       const board = await boardServiceInstance.create(new Board(req.body));
-      return res.json(board).status(201);
+      return res.status(201).json(board);
     } catch (e) {
       return next(e);
     }
@@ -122,7 +132,7 @@ route.put(
         req.params.id,
         new Board(req.body)
       );
-      return res.json(updatedBoard).status(200);
+      return res.status(200).json(updatedBoard);
     } catch (e) {
       return next(e);
     }
