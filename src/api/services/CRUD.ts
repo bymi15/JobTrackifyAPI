@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Service } from 'typedi';
-import { MongoRepository } from 'typeorm';
+import { Entity, MongoRepository, ObjectLiteral } from 'typeorm';
 import { Logger } from 'winston';
 import { validate } from 'class-validator';
 import { ErrorHandler } from '../../helpers/ErrorHandler';
+import _ from 'lodash';
 
 @Service()
 export default class CRUD<Entity> {
@@ -71,18 +72,16 @@ export default class CRUD<Entity> {
     throw new ErrorHandler(404, 'Not found');
   }
 
-  async update(id: string, newEntity: Entity): Promise<Entity> {
+  async update(id: string, updatedFields: ObjectLiteral): Promise<Entity> {
     const entity = await this.repo.findOne(id);
-    if (!entity) throw new ErrorHandler(500, 'The id is invalid');
-    Object.keys(newEntity).forEach((key) => {
-      if (newEntity[key]) {
-        entity[key] = newEntity[key];
+    Object.keys(updatedFields).forEach((key) => {
+      if (!!updatedFields[key] && _.has(entity, key)) {
+        entity[key] = updatedFields[key];
       }
     });
-    const errors = await validate(entity, {
-      validationError: { target: false },
-    });
-    if (errors.length > 0) throw errors;
+    if (_.has(entity, 'updatedAt')) {
+      entity['updatedAt'] = new Date().toISOString();
+    }
     return this.repo.save(entity);
   }
 
