@@ -41,3 +41,6 @@ typings/
 .mongodb/
 
 coverage/
+
+# Load testing
+artillery/
