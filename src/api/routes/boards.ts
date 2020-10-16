@@ -110,7 +110,7 @@ route.post(
   }
 );
 
-route.put(
+route.patch(
   '/:id',
   isAuth,
   attachUser,
@@ -121,7 +121,10 @@ route.put(
   }),
   async (req, res, next) => {
     const logger: Logger = Container.get('logger');
-    logger.debug('Calling PUT to /boards/:id endpoint with body: %o', req.body);
+    logger.debug(
+      'Calling PATCH to /boards/:id endpoint with body: %o',
+      req.body
+    );
     try {
       const boardServiceInstance = Container.get(BoardService);
       const board = await boardServiceInstance.getRepo().findOne(req.params.id);
