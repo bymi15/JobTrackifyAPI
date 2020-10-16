@@ -79,6 +79,10 @@ export default class CRUD<Entity> {
         entity[key] = updatedFields[key];
       }
     });
+    const errors = await validate(entity, {
+      validationError: { target: false },
+    });
+    if (errors.length > 0) throw errors;
     if (_.has(entity, 'updatedAt')) {
       entity['updatedAt'] = new Date().toISOString();
     }
