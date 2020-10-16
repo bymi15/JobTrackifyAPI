@@ -289,9 +289,9 @@ export default class Generator {
       '    }\n' +
       '  });\n' +
       '\n' +
-      this.routeFunctionHeader('put', '/:id', this.routeValidation(fields)) +
+      this.routeFunctionHeader('patch', '/:id', this.routeValidation(fields)) +
       "    const logger: Logger = Container.get('logger');\n" +
-      `    logger.debug('Calling PUT to /${camelCase(
+      `    logger.debug('Calling PATCH to /${camelCase(
         pluralizeLastWord(this.entityName)
       )}/:id endpoint with body: %o', req.body);\n` +
       '    try {\n' +
