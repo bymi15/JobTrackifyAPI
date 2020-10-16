@@ -73,7 +73,10 @@ export default class CRUD<Entity> {
   }
 
   async update(id: string, updatedFields: ObjectLiteral): Promise<Entity> {
-    const entity = await this.findOne(id);
+    const entity = await this.repo.findOne(id);
+    if (!entity) {
+      throw new ErrorHandler(404, 'Not found');
+    }
     Object.keys(updatedFields).forEach((key) => {
       if (!!updatedFields[key] && _.has(entity, key)) {
         entity[key] = updatedFields[key];
@@ -86,7 +89,7 @@ export default class CRUD<Entity> {
     if (_.has(entity, 'updatedAt')) {
       entity['updatedAt'] = new Date().toISOString();
     }
-    return this.repo.save(entity);
+    return await this.repo.save(entity);
   }
 
   async delete(id: string): Promise<void> {

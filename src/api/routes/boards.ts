@@ -132,9 +132,10 @@ route.put(
       ) {
         return res.sendStatus(403);
       }
-      const updatedBoard = await boardServiceInstance.update(req.params.id, {
-        title: req.body.title,
-      });
+      const updatedBoard = await boardServiceInstance.update(
+        req.params.id,
+        req.body
+      );
       return res.status(200).json(updatedBoard);
     } catch (e) {
       return next(e);
