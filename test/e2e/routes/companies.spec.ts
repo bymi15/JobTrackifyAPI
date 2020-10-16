@@ -382,7 +382,7 @@ describe('CompaniesRoute', () => {
     });
   });
 
-  describe('PUT /companies/:id', () => {
+  describe('PATCH /companies/:id', () => {
     it('should successfully update a company for admin user', async () => {
       const mockCompany = await companySeed.seedOne();
       const mockCompanyId = mockCompany.id.toHexString();
@@ -397,7 +397,7 @@ describe('CompaniesRoute', () => {
         description: 'mockCompanyDescription',
       };
       res = await request
-        .put(`${baseUrl}/${mockCompanyId}`)
+        .patch(`${baseUrl}/${mockCompanyId}`)
         .send(mockBody)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
@@ -424,7 +424,7 @@ describe('CompaniesRoute', () => {
         description: 'mockCompanyDescription',
       };
       res = await request
-        .put(`${baseUrl}/${mockCompanyId}`)
+        .patch(`${baseUrl}/${mockCompanyId}`)
         .send(mockBody)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(200);
@@ -445,7 +445,7 @@ describe('CompaniesRoute', () => {
         description: 'mockCompanyDescription',
       };
       let res = await request
-        .put(`${baseUrl}/${mockCompanyId}`)
+        .patch(`${baseUrl}/${mockCompanyId}`)
         .send(mockBody)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(403);
@@ -464,7 +464,7 @@ describe('CompaniesRoute', () => {
         description: 'mockCompanyDescription',
       };
       const res = await request
-        .put(`${baseUrl}/${mockCompanyId}`)
+        .patch(`${baseUrl}/${mockCompanyId}`)
         .send(mockBody);
       expect(res.statusCode).toEqual(401);
       expect(res.body).toHaveProperty('error');
@@ -474,7 +474,7 @@ describe('CompaniesRoute', () => {
       const mockCompanyId = mockCompany.id.toHexString();
       const mockBody = { foundedYear: 'mockInvalidFoundedYear' };
       const res = await request
-        .put(`${baseUrl}/${mockCompanyId}`)
+        .patch(`${baseUrl}/${mockCompanyId}`)
         .send(mockBody)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(400);
@@ -485,7 +485,7 @@ describe('CompaniesRoute', () => {
       const mockCompanyId = mockCompany.id.toHexString();
       const mockBody = { logo: 'mockInvalidLogoUrl' };
       const res = await request
-        .put(`${baseUrl}/${mockCompanyId}`)
+        .patch(`${baseUrl}/${mockCompanyId}`)
         .send(mockBody)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(400);
@@ -496,7 +496,7 @@ describe('CompaniesRoute', () => {
       const mockCompanyId = mockCompany.id.toHexString();
       const mockBody = { website: 'mockInvalidWebsiteUrl' };
       const res = await request
-        .put(`${baseUrl}/${mockCompanyId}`)
+        .patch(`${baseUrl}/${mockCompanyId}`)
         .send(mockBody)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(400);

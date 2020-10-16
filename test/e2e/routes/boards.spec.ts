@@ -467,7 +467,7 @@ describe('BoardsRoute', () => {
       expect(res.body).toHaveProperty('error');
     });
   });
-  describe('PUT /boards/:id', () => {
+  describe('PATCH /boards/:id', () => {
     let mockNormalBoard: Board, mockStaffBoard: Board, mockAdminBoard: Board;
     beforeEach(async () => {
       mockNormalBoard = await normalBoardSeed.seedOne();
@@ -490,7 +490,7 @@ describe('BoardsRoute', () => {
         title: 'mockBoardTitle',
       };
       res = await request
-        .put(`${baseUrl}/${mockBoardId}`)
+        .patch(`${baseUrl}/${mockBoardId}`)
         .send(mockBody)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
@@ -510,7 +510,7 @@ describe('BoardsRoute', () => {
         title: 'mockBoardTitle',
       };
       res = await request
-        .put(`${baseUrl}/${mockBoardId}`)
+        .patch(`${baseUrl}/${mockBoardId}`)
         .send(mockBody)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(200);
@@ -530,7 +530,7 @@ describe('BoardsRoute', () => {
         title: 'mockBoardTitle',
       };
       res = await request
-        .put(`${baseUrl}/${mockBoardId}`)
+        .patch(`${baseUrl}/${mockBoardId}`)
         .send(mockBody)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(200);
@@ -542,21 +542,21 @@ describe('BoardsRoute', () => {
     it('admin user should be able to update any board', async () => {
       const mockBoard = { title: 'mockBoardTitle' };
       let res = await request
-        .put(`${baseUrl}/${mockNormalBoard.id}`)
+        .patch(`${baseUrl}/${mockNormalBoard.id}`)
         .send(mockBoard)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.id).toEqual(mockNormalBoard.id.toHexString());
       expect(res.body.title).toEqual(mockBoard.title);
       res = await request
-        .put(`${baseUrl}/${mockStaffBoard.id}`)
+        .patch(`${baseUrl}/${mockStaffBoard.id}`)
         .send(mockBoard)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.id).toEqual(mockStaffBoard.id.toHexString());
       expect(res.body.title).toEqual(mockBoard.title);
       res = await request
-        .put(`${baseUrl}/${mockAdminBoard.id}`)
+        .patch(`${baseUrl}/${mockAdminBoard.id}`)
         .send(mockBoard)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
@@ -566,19 +566,19 @@ describe('BoardsRoute', () => {
     it('staff user should only be able to update their own board and otherwise return forbidden error', async () => {
       const mockBoard = { title: 'mockBoardTitle' };
       let res = await request
-        .put(`${baseUrl}/${mockNormalBoard.id}`)
+        .patch(`${baseUrl}/${mockNormalBoard.id}`)
         .send(mockBoard)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(403);
       res = await request
-        .put(`${baseUrl}/${mockStaffBoard.id}`)
+        .patch(`${baseUrl}/${mockStaffBoard.id}`)
         .send(mockBoard)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.id).toEqual(mockStaffBoard.id.toHexString());
       expect(res.body.title).toEqual(mockBoard.title);
       res = await request
-        .put(`${baseUrl}/${mockAdminBoard.id}`)
+        .patch(`${baseUrl}/${mockAdminBoard.id}`)
         .send(mockBoard)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(403);
@@ -586,26 +586,26 @@ describe('BoardsRoute', () => {
     it('normal user should only be able to update their own board and otherwise return forbidden error', async () => {
       const mockBoard = { title: 'mockBoardTitle' };
       let res = await request
-        .put(`${baseUrl}/${mockNormalBoard.id}`)
+        .patch(`${baseUrl}/${mockNormalBoard.id}`)
         .send(mockBoard)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.id).toEqual(mockNormalBoard.id.toHexString());
       expect(res.body.title).toEqual(mockBoard.title);
       res = await request
-        .put(`${baseUrl}/${mockStaffBoard.id}`)
+        .patch(`${baseUrl}/${mockStaffBoard.id}`)
         .send(mockBoard)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(403);
       res = await request
-        .put(`${baseUrl}/${mockAdminBoard.id}`)
+        .patch(`${baseUrl}/${mockAdminBoard.id}`)
         .send(mockBoard)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(403);
     });
     it('should return an unauthorized error without an auth token', async () => {
       const res = await request
-        .put(`${baseUrl}/${mockNormalBoard.id.toHexString()}`)
+        .patch(`${baseUrl}/${mockNormalBoard.id.toHexString()}`)
         .send({ title: 'mockBoardTitle' });
       expect(res.statusCode).toEqual(401);
       expect(res.body).toHaveProperty('error');
@@ -613,7 +613,7 @@ describe('BoardsRoute', () => {
     it('should return validation error if title is an empty string', async () => {
       const mockBody = { title: '' };
       const res = await request
-        .put(`${baseUrl}/${mockNormalBoard}`)
+        .patch(`${baseUrl}/${mockNormalBoard}`)
         .send(mockBody)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(400);
@@ -622,7 +622,7 @@ describe('BoardsRoute', () => {
     it('should return validation error if title is not a valid string', async () => {
       const mockBody = { title: 5 };
       const res = await request
-        .put(`${baseUrl}/${mockNormalBoard}`)
+        .patch(`${baseUrl}/${mockNormalBoard}`)
         .send(mockBody)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(400);
