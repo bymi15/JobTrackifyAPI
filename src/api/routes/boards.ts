@@ -6,6 +6,7 @@ import { Logger } from 'winston';
 import { Board } from '../entities/Board';
 import { attachUser, checkRole, isAuth } from '../middlewares';
 import { User } from '../entities/User';
+import { ObjectID } from 'typeorm';
 
 const route = Router();
 
@@ -123,15 +124,17 @@ route.put(
     logger.debug('Calling PUT to /boards/:id endpoint with body: %o', req.body);
     try {
       const boardServiceInstance = Container.get(BoardService);
-      const boardUser = (await boardServiceInstance.findOne(req.params.id))
-        .owner as User;
-      if (!boardUser.id.equals(req.currentUser.id)) return res.sendStatus(403);
-      req.body.owner = req.currentUser.id;
-
-      const updatedBoard = await boardServiceInstance.update(
-        req.params.id,
-        new Board(req.body)
-      );
+      const board = await boardServiceInstance.getRepo().findOne(req.params.id);
+      if (!board) return res.sendStatus(500);
+      if (
+        req.currentUser.role !== 'admin' &&
+        !(board.owner as ObjectID).equals(req.currentUser.id)
+      ) {
+        return res.sendStatus(403);
+      }
+      const updatedBoard = await boardServiceInstance.update(req.params.id, {
+        title: req.body.title,
+      });
       return res.status(200).json(updatedBoard);
     } catch (e) {
       return next(e);
