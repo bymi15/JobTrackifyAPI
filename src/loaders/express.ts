@@ -47,7 +47,7 @@ export default (app: Application): void => {
         });
       }
       Logger.error('Error: %o', messageArr);
-      res.status(400).json({ errors: messageArr }).end();
+      res.status(400).json({ error: messageArr }).end();
     } else if (err.name === 'UnauthorizedError') {
       /**
        * Handle 401 thrown by express-jwt library
