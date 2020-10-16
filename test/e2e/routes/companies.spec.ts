@@ -342,7 +342,7 @@ describe('CompaniesRoute', () => {
         .send(mockBody)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(400);
-      expect(res.body).toHaveProperty('errors');
+      expect(res.body).toHaveProperty('error');
     });
     it('should return validation error if logo is not a valid url', async () => {
       const mockCompany = CompanyFactory();
@@ -360,7 +360,7 @@ describe('CompaniesRoute', () => {
         .send(mockBody)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(400);
-      expect(res.body).toHaveProperty('errors');
+      expect(res.body).toHaveProperty('error');
     });
     it('should return validation error if website is not a valid url', async () => {
       const mockCompany = CompanyFactory();
@@ -378,7 +378,7 @@ describe('CompaniesRoute', () => {
         .send(mockBody)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(400);
-      expect(res.body).toHaveProperty('errors');
+      expect(res.body).toHaveProperty('error');
     });
   });
 
@@ -478,7 +478,7 @@ describe('CompaniesRoute', () => {
         .send(mockBody)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(400);
-      expect(res.body).toHaveProperty('errors');
+      expect(res.body).toHaveProperty('error');
     });
     it('should return validation error if logo is not a valid url', async () => {
       const mockCompany = await companySeed.seedOne();
@@ -489,7 +489,7 @@ describe('CompaniesRoute', () => {
         .send(mockBody)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(400);
-      expect(res.body).toHaveProperty('errors');
+      expect(res.body).toHaveProperty('error');
     });
     it('should return validation error if website is not a valid url', async () => {
       const mockCompany = await companySeed.seedOne();
@@ -500,7 +500,7 @@ describe('CompaniesRoute', () => {
         .send(mockBody)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(400);
-      expect(res.body).toHaveProperty('errors');
+      expect(res.body).toHaveProperty('error');
     });
   });
 });
