@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Service } from 'typedi';
-import { Entity, MongoRepository, ObjectLiteral } from 'typeorm';
+import { MongoRepository, ObjectLiteral } from 'typeorm';
 import { Logger } from 'winston';
 import { validate } from 'class-validator';
 import { ErrorHandler } from '../../helpers/ErrorHandler';
@@ -73,7 +73,7 @@ export default class CRUD<Entity> {
   }
 
   async update(id: string, updatedFields: ObjectLiteral): Promise<Entity> {
-    const entity = await this.repo.findOne(id);
+    const entity = await this.findOne(id);
     Object.keys(updatedFields).forEach((key) => {
       if (!!updatedFields[key] && _.has(entity, key)) {
         entity[key] = updatedFields[key];
