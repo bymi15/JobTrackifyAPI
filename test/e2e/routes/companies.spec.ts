@@ -382,7 +382,7 @@ describe('CompaniesRoute', () => {
     });
   });
 
-  describe('PUT /companies', () => {
+  describe('PUT /companies/:id', () => {
     it('should successfully update a company for admin user', async () => {
       const mockCompany = await companySeed.seedOne();
       const mockCompanyId = mockCompany.id.toHexString();

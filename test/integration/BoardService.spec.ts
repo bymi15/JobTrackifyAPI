@@ -132,13 +132,13 @@ describe('BoardService', () => {
 
     test('Should successfully update a board by id with only title defined', async () => {
       const board = await boardSeed.seedOne();
-      const mockNewBoard = new Board({ title: 'newTitle' });
+      const mockUpdatedFields = { title: 'newTitle' };
       const response = await boardServiceInstance.update(
         board.id.toHexString(),
-        mockNewBoard
+        mockUpdatedFields
       );
       expect(response).toBeDefined();
-      expect(response.title).toEqual('newTitle');
+      expect(response.title).toEqual(mockUpdatedFields.title);
       expect(response.owner).toEqual(mockUser);
     });
   });
