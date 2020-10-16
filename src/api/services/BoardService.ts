@@ -1,6 +1,6 @@
 import Container, { Inject, Service } from 'typedi';
 import { Board } from '../entities/Board';
-import { MongoRepository, ObjectID } from 'typeorm';
+import { MongoRepository, ObjectID, ObjectLiteral } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Logger } from 'winston';
 import CRUD from './CRUD';
@@ -51,8 +51,8 @@ export default class BoardService extends CRUD<Board> {
     return board;
   }
 
-  async update(id: string, board: Board): Promise<Board> {
-    const updatedBoard = await super.update(id, board);
+  async update(id: string, updatedFields: ObjectLiteral): Promise<Board> {
+    const updatedBoard = await super.update(id, updatedFields);
     if (updatedBoard) {
       await this.fillOwnerWithUser(updatedBoard);
     }
