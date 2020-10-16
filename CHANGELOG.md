@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0](https://github.com/bymi15/JobTrackifyAPI/compare/v0.2.2...v0.3.0) (2020-10-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Board:** add Board entity, route, service and factory
+
+### Features
+
+* **app:** separate server.ts for e2e testing ([30dff46](https://github.com/bymi15/JobTrackifyAPI/commit/30dff462b7af552dbc2de0d0177a42a76c99c911))
+* **Board:** add Board API ([91c811f](https://github.com/bymi15/JobTrackifyAPI/commit/91c811f85cd35b40f84ca9d47e445cac4efe4ab2))
+* **BoardService:** add Board service ([27ce090](https://github.com/bymi15/JobTrackifyAPI/commit/27ce09051c9a8faaeb0e43de3b0b7f99d9035940))
+* **companyRoute:** add checkRole to only allow staff users write access ([ccabbb6](https://github.com/bymi15/JobTrackifyAPI/commit/ccabbb641d396be7a6acee6ec8bb9ea746c5f123))
+* **CRUD:** add fillObjectIdField function ([ca35e6b](https://github.com/bymi15/JobTrackifyAPI/commit/ca35e6be6710a0f86b78da98e4642709561292f7))
+* **ErrorHandler:** use custom ErrorHandler for throwing errors with status codes ([425385c](https://github.com/bymi15/JobTrackifyAPI/commit/425385cc5ff7e1ee30127c63361d5f5978830a4d))
+* **factories:** add Board factory ([0f3a48c](https://github.com/bymi15/JobTrackifyAPI/commit/0f3a48cc2437f0a7e8495a382111c823da0967ba))
+* **helpers:** add ErrorHandler ([093f088](https://github.com/bymi15/JobTrackifyAPI/commit/093f0881a9394de4937da8ce4b2232a59d37dfce))
+* **middlewares:** add checkRole middleware ([5d6df48](https://github.com/bymi15/JobTrackifyAPI/commit/5d6df48dea968c461534578151bdae276d4a1219))
+* **routes:** add boards route ([e7a458a](https://github.com/bymi15/JobTrackifyAPI/commit/e7a458ae9f6637a99f8f707e95b47841a75f0ae1))
+* **routes:** add user endpoints ([0598963](https://github.com/bymi15/JobTrackifyAPI/commit/059896315c90087ae20a70f10845873690c89885))
+* **routes:** add user endpoints ([92a69a3](https://github.com/bymi15/JobTrackifyAPI/commit/92a69a323b55bd0902ada8034cfd171cffc510cc))
+* **seeds:** add Board seed ([be6f124](https://github.com/bymi15/JobTrackifyAPI/commit/be6f1245af98d3027e3ce532f1892014c6ef56ff))
+* **User:** add hasAccessTo function to check role ([663ff8e](https://github.com/bymi15/JobTrackifyAPI/commit/663ff8e95e4cce62affc9623ad9300851026555a))
+* **UserService:** add find and findOne functions that remove password field ([72e9a1b](https://github.com/bymi15/JobTrackifyAPI/commit/72e9a1bcebb6762c75c95f6de98faadad7f1fe64))
+
+
+### Bug Fixes
+
+* **generateToken:** use async jwt sign ([e9bbab0](https://github.com/bymi15/JobTrackifyAPI/commit/e9bbab08e45aec5102befbea6af8f96974066a84))
+* bug fixes ([3befcca](https://github.com/bymi15/JobTrackifyAPI/commit/3befccad31cba917d4d1966112e54b95747f0f20))
+* **boardsRoute:** call status before json ([c796825](https://github.com/bymi15/JobTrackifyAPI/commit/c7968252150038478bd03557a20a8f723d4cb6ec))
+* **companiesRoute:** set fields optional except name ([74021b8](https://github.com/bymi15/JobTrackifyAPI/commit/74021b8c9e6fd6dcd7c224b8882fd37ed825faad))
+* **CRUD:** add error check for find and findOne ([fbe5488](https://github.com/bymi15/JobTrackifyAPI/commit/fbe5488aa90ecef9afb30a77b682a474aaabff53))
+* **CRUD:** fix update findOne bug ([2d3322f](https://github.com/bymi15/JobTrackifyAPI/commit/2d3322fbfb3a4a06c723b7be0dc28377ecef0541))
+* **CRUD:** fix update function ([32f55a8](https://github.com/bymi15/JobTrackifyAPI/commit/32f55a88a573e51749747f93c46a30df6283839c))
+* **CRUD:** fix update validation check ([27f7246](https://github.com/bymi15/JobTrackifyAPI/commit/27f7246a3df5fc06c0f01f1f896959a5b7d31290))
+* **entities:** fix company entity createdAt default value ([866f682](https://github.com/bymi15/JobTrackifyAPI/commit/866f68266d446d8eb5e1b8d075b0a99d2b838486))
+* **expressLoader:** add celebrate validation error handler ([5a667b2](https://github.com/bymi15/JobTrackifyAPI/commit/5a667b2a725db77d0df20ff8d8685f4be8ac4e3b))
+* **Generator:** refactor route json response format ([19820ff](https://github.com/bymi15/JobTrackifyAPI/commit/19820ffda43552fd40eda357fdfdc711a6b61f89))
+* **package.json:** add --runInBand jest option for testing in series ([bc9521c](https://github.com/bymi15/JobTrackifyAPI/commit/bc9521cfb213353d38f4ddee7edd6e044c673679))
+* **routes:** fix boards update route ([6fb5e45](https://github.com/bymi15/JobTrackifyAPI/commit/6fb5e453d9f1b9a19be294e9499a5d4c8cdc0edd))
+* **services:** refactor id type to be strictly string ([c777e24](https://github.com/bymi15/JobTrackifyAPI/commit/c777e2499a53b276fea13e0c15b7e5fbacd30991))
+* **UserService:** change 500 to 400 error code ([4f71416](https://github.com/bymi15/JobTrackifyAPI/commit/4f71416de346c0d2e754ac702d2c3669d32dc1c8))
+
 ### [0.2.2](https://github.com/bymi15/JobTrackifyAPI/compare/v0.2.1...v0.2.2) (2020-10-05)
 
 
