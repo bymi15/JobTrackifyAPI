@@ -358,7 +358,7 @@ export default class Generator {
     `  let ${camelCase(this.entityName)}ServiceInstance: ${
       this.entityName
     }Service;\n` +
-    '  beforeAll(async (done) => {\n' +
+    '  beforeAll(async () => {\n' +
     '    Container.reset();\n' +
     '    connection = await databaseLoader();\n' +
     '    await connection.synchronize(true);\n' +
@@ -372,19 +372,16 @@ export default class Generator {
     `    ${camelCase(this.entityName)}ServiceInstance = Container.get(${
       this.entityName
     }Service);\n` +
-    '    done();\n' +
     '  });\n' +
     '\n' +
-    '  beforeEach(async (done) => {\n' +
+    '  beforeEach(async () => {\n' +
     '    await connection.dropDatabase();\n' +
-    '    done();\n' +
     '  });\n' +
     '\n' +
-    '  afterAll(async (done) => {\n' +
+    '  afterAll(async () => {\n' +
     '    if (connection.isConnected) {\n' +
     '      await connection.close();\n' +
     '    }\n' +
-    '    done();\n' +
     '  });\n' +
     '\n' +
     "  describe('create', () => {\n" +
@@ -395,7 +392,6 @@ export default class Generator {
     `      const response = await ${camelCase(
       this.entityName
     )}ServiceInstance.create(mock${this.entityName});\n` +
-    '\n' +
     '      expect(response).toBeDefined();\n' +
     '      expect(response.id).toBeDefined();\n' +
     '    });\n' +
