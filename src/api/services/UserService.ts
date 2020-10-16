@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import config from '../../config';
 import { Inject, Service } from 'typedi';
 import { User } from '../entities/User';
-import { MongoRepository, ObjectID } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Logger } from 'winston';
 import { IUserInputDTO, IUserResponseDTO } from '../../types';
@@ -47,7 +47,7 @@ export default class UserService extends CRUD<User> {
     const userRecord: User = await this.userRepo.save(newUser);
     if (!userRecord) throw new ErrorHandler(500, 'User cannot be created');
 
-    const token = this.generateToken(userRecord);
+    const token = await this.generateToken(userRecord);
     const user = userRecord;
     Reflect.deleteProperty(user, 'password');
     return { user, token };
@@ -60,7 +60,7 @@ export default class UserService extends CRUD<User> {
 
     const validPassword = await bcrypt.compare(password, userRecord.password);
     if (validPassword) {
-      const token = this.generateToken(userRecord);
+      const token = await this.generateToken(userRecord);
       const user = userRecord;
       Reflect.deleteProperty(user, 'password');
       return { user, token };
@@ -68,20 +68,29 @@ export default class UserService extends CRUD<User> {
     throw new ErrorHandler(401, 'Invalid email or password');
   }
 
-  private generateToken(userRecord: User): string {
-    const today = new Date();
-    const exp = new Date(today);
-    exp.setDate(today.getDate() + 7);
+  private async generateToken(userRecord: User): Promise<string> {
     this.logger.debug(`Signing JWT for userId: ${userRecord.id}`);
-    return jwt.sign(
-      {
-        id: userRecord.id,
-        role: userRecord.role,
-        email: userRecord.email,
-        exp: exp.getTime() / 1000,
-      },
-      config.jwtSecret
-    );
+    return new Promise<string>((resolve, reject) => {
+      const today = new Date();
+      const exp = new Date(today);
+      exp.setDate(today.getDate() + 7);
+      jwt.sign(
+        {
+          id: userRecord.id,
+          role: userRecord.role,
+          email: userRecord.email,
+          exp: exp.getTime() / 1000,
+        },
+        config.jwtSecret,
+        { algorithm: 'HS256' },
+        (err, token) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(token);
+        }
+      );
+    });
   }
 
   async find(): Promise<User[]> {
