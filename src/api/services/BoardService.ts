@@ -54,6 +54,7 @@ export default class BoardService extends CRUD<Board> {
   async update(id: string, updatedFields: ObjectLiteral): Promise<Board> {
     const updatedBoard = await super.update(id, updatedFields);
     if (updatedBoard) {
+      this.logger.debug('after: %o', updatedBoard);
       await this.fillOwnerWithUser(updatedBoard);
     }
     return updatedBoard;
