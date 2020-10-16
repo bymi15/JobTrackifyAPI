@@ -119,11 +119,10 @@ export default class Generator {
         `  public constructor(data?: ${this.entityName}) {\n` +
         '    if (data) {\n' +
         '      this.field = data.field;\n' +
-        '      }\n' +
         '    }\n' +
-        '  }\n';
+        '  }\n' +
+        '}\n';
     }
-    res += '}\n';
     return res;
   };
 
@@ -222,9 +221,9 @@ export default class Generator {
       `    const ${camelCase(
         pluralizeLastWord(this.entityName)
       )} = await ${camelCase(this.entityName)}ServiceInstance.find();\n` +
-      `    return res.json(${camelCase(
+      `    return res.status(200).json(${camelCase(
         pluralizeLastWord(this.entityName)
-      )}).status(200);\n` +
+      )});\n` +
       '  } catch (e) {\n' +
       '    return next(e);\n' +
       '  }\n' +
@@ -242,7 +241,7 @@ export default class Generator {
       `    const ${camelCase(this.entityName)} = await ${camelCase(
         this.entityName
       )}ServiceInstance.findOne(req.params.id);\n` +
-      `    return res.json(${camelCase(this.entityName)}).status(200);\n` +
+      `    return res.status(200).json(${camelCase(this.entityName)});\n` +
       '  } catch (e) {\n' +
       '    return next(e);\n' +
       '  }\n' +
@@ -284,7 +283,7 @@ export default class Generator {
       )}ServiceInstance.create(\n` +
       `        new ${this.entityName}(req.body)\n` +
       '      );\n' +
-      `      return res.json(${camelCase(this.entityName)}).status(201);\n` +
+      `      return res.status(201).json(${camelCase(this.entityName)});\n` +
       '    } catch (e) {\n' +
       '      return next(e);\n' +
       '    }\n' +
@@ -303,9 +302,9 @@ export default class Generator {
         this.entityName
       )}ServiceInstance.update(\n` +
       `        req.params.id,\n` +
-      `        new ${this.entityName}(req.body)\n` +
+      `        req.body\n` +
       '      );\n' +
-      `      return res.json(${camelCase(this.entityName)}).status(200);\n` +
+      `      return res.status(200).json(${camelCase(this.entityName)});\n` +
       '    } catch (e) {\n' +
       '      return next(e);\n' +
       '    }\n' +
