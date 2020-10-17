@@ -19,4 +19,8 @@ export default class BoardColumnService extends CRUD<BoardColumn> {
   async create(boardColumn: BoardColumn): Promise<BoardColumn> {
     return await super.create(boardColumn, 'title');
   }
+
+  async find(): Promise<BoardColumn[]> {
+    return await super.find({ order: { id: 'ASC' } });
+  }
 }
