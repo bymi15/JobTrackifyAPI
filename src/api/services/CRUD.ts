@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Service } from 'typedi';
-import { MongoRepository, ObjectLiteral } from 'typeorm';
+import { FindManyOptions, MongoRepository, ObjectLiteral } from 'typeorm';
 import { Logger } from 'winston';
 import { validate } from 'class-validator';
 import { ErrorHandler } from '../../helpers/ErrorHandler';
@@ -56,8 +56,8 @@ export default class CRUD<Entity> {
     return await this.repo.save(entity);
   }
 
-  async find(): Promise<Entity[]> {
-    const entities = await this.repo.find();
+  async find(options?: FindManyOptions<Entity>): Promise<Entity[]> {
+    const entities = await this.repo.find(options);
     if (entities) {
       return entities;
     }
