@@ -28,7 +28,12 @@ export default class BoardService extends CRUD<Board> {
   }
 
   async findByOwner(owner: ObjectID): Promise<Board[]> {
-    const boards: Board[] = await this.repo.find({ owner: owner });
+    const boards: Board[] = await super.find({
+      where: {
+        owner: { $eq: owner },
+      },
+      order: { createdAt: 'DESC' },
+    });
     for (const board of boards) {
       Reflect.deleteProperty(board, 'owner');
     }
@@ -36,7 +41,7 @@ export default class BoardService extends CRUD<Board> {
   }
 
   async find(): Promise<Board[]> {
-    const boards: Board[] = await super.find();
+    const boards: Board[] = await super.find({ order: { createdAt: 'DESC' } });
     for (const board of boards) {
       await this.fillOwnerWithUser(board);
     }
