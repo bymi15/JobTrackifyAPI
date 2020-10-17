@@ -19,4 +19,8 @@ export default class CompanyService extends CRUD<Company> {
   async create(company: Company): Promise<Company> {
     return await super.create(company, 'name');
   }
+
+  async find(): Promise<Company[]> {
+    return await super.find({ order: { name: 'ASC' } });
+  }
 }
