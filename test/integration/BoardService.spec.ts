@@ -73,6 +73,19 @@ describe('BoardService', () => {
       expect(response[0].title).toBeDefined();
       expect(response[0].owner).toBeUndefined();
     });
+
+    test('Should return boards in descending order of createdAt', async () => {
+      const mockBoards = await boardSeed.seedMany(5);
+      mockBoards.sort((a, b) =>
+        a.createdAt < b.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0
+      );
+      mockBoards.forEach((board) => {
+        Reflect.deleteProperty(board, 'owner');
+      });
+      const response = await boardServiceInstance.findByOwner(mockUser.id);
+      expect(response).toBeDefined();
+      expect(response).toEqual(mockBoards);
+    });
   });
 
   describe('find', () => {
@@ -89,6 +102,18 @@ describe('BoardService', () => {
       expect(response).toBeDefined();
       expect(response[0].owner).toBeDefined();
       expect(response[0].owner).toEqual(mockUser);
+    });
+    test('Should return boards in descending order of createdAt', async () => {
+      const mockBoards = await boardSeed.seedMany(5);
+      mockBoards.sort((a, b) =>
+        a.createdAt < b.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0
+      );
+      const response = await boardServiceInstance.find();
+      expect(response).toBeDefined();
+      response.forEach((board) => {
+        board.owner = (board.owner as User).id;
+      });
+      expect(response).toEqual(mockBoards);
     });
   });
 

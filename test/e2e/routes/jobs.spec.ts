@@ -2,20 +2,19 @@ import supertest from 'supertest';
 import { Connection, getConnection } from 'typeorm';
 import EntitySeed from '../../../src/database/seeds/EntitySeed';
 import server from '../../../src/server';
-import BoardColumnFactory from '../../../src/database/factories/BoardColumnFactory';
+import JobFactory from '../../../src/database/factories/JobFactory';
 import UserFactory from '../../../src/database/factories/UserFactory';
 import Logger from '../../../src/logger';
 import Container from 'typedi';
-import { BoardColumn } from '../../../src/api/entities/BoardColumn';
+import { Job } from '../../../src/api/entities/Job';
 import { User } from '../../../src/api/entities/User';
 jest.mock('../../../src/logger');
 
-describe('BoardColumnsRoute', () => {
+describe('JobRoute', () => {
   let request: any;
   let connection: Connection;
-  let boardColumnSeed: EntitySeed<BoardColumn>;
-  const baseUrl = '/api/boardColumns';
-
+  let jobSeed: EntitySeed<Job>;
+  const baseUrl = '/api/job';
   let adminUserToken: string, staffUserToken: string, normalUserToken: string;
   beforeAll(async () => {
     const app = await server();
@@ -23,9 +22,9 @@ describe('BoardColumnsRoute', () => {
     Container.set('logger', Logger);
     connection = getConnection();
     await connection.dropDatabase();
-    boardColumnSeed = new EntitySeed<BoardColumn>(
-      connection.getMongoRepository(BoardColumn),
-      BoardColumnFactory
+    jobSeed = new EntitySeed<Job>(
+      connection.getMongoRepository(Job),
+      JobFactory
     );
     const userSeed = new EntitySeed<User>(
       connection.getMongoRepository(User),
@@ -43,19 +42,16 @@ describe('BoardColumnsRoute', () => {
       role: 'user',
       password: 'userPassword',
     });
-
     let res = await request.post('/api/auth/login').send({
       email: adminUser.email,
       password: 'adminPassword',
     });
     adminUserToken = `Bearer ${res.body.token}`;
-
     res = await request.post('/api/auth/login').send({
       email: staffUser.email,
       password: 'staffPassword',
     });
     staffUserToken = `Bearer ${res.body.token}`;
-
     res = await request.post('/api/auth/login').send({
       email: normalUser.email,
       password: 'userPassword',
@@ -65,7 +61,7 @@ describe('BoardColumnsRoute', () => {
 
   beforeEach(async () => {
     try {
-      await connection.getMongoRepository(BoardColumn).clear();
+      await connection.getMongoRepository(Job).clear();
     } catch (err) {}
   });
 
@@ -75,145 +71,133 @@ describe('BoardColumnsRoute', () => {
     }
   });
 
-  describe('GET /boardColumn', () => {
-    it('should return a list of board columns for admin user', async () => {
-      const mockBoardColumns = await boardColumnSeed.seedMany(3);
+  describe('GET /job', () => {
+    it('should return a list of jobs for admin user', async () => {
+      const mockJobs = await jobSeed.seedMany(3);
       const res = await request
         .get(baseUrl)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.length).toEqual(3);
       expect(res.body.sort()[0].id).toEqual(
-        mockBoardColumns.sort()[0].id.toHexString()
+        mockJobs.sort()[0].id.toHexString()
       );
-      expect(res.body.sort()[0].title).toEqual(
-        mockBoardColumns.sort()[0].title
-      );
+      expect(res.body.sort()[0].title).toEqual(mockJobs.sort()[0].title);
     });
-    it('should return a list of board columns for staff user', async () => {
-      const mockBoardColumns = await boardColumnSeed.seedMany(3);
+    it('should return a list of jobs for staff user', async () => {
+      const mockJobs = await jobSeed.seedMany(3);
       const res = await request
         .get(baseUrl)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.length).toEqual(3);
       expect(res.body.sort()[0].id).toEqual(
-        mockBoardColumns.sort()[0].id.toHexString()
+        mockJobs.sort()[0].id.toHexString()
       );
-      expect(res.body.sort()[0].title).toEqual(
-        mockBoardColumns.sort()[0].title
-      );
+      expect(res.body.sort()[0].title).toEqual(mockJobs.sort()[0].title);
     });
-    it('should return a list of board columns for normal user', async () => {
-      const mockBoardColumns = await boardColumnSeed.seedMany(3);
+    it('should return a list of jobs for normal user', async () => {
+      const mockJobs = await jobSeed.seedMany(3);
       const res = await request
         .get(baseUrl)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.length).toEqual(3);
       expect(res.body.sort()[0].id).toEqual(
-        mockBoardColumns.sort()[0].id.toHexString()
+        mockJobs.sort()[0].id.toHexString()
       );
-      expect(res.body.sort()[0].title).toEqual(
-        mockBoardColumns.sort()[0].title
-      );
+      expect(res.body.sort()[0].title).toEqual(mockJobs.sort()[0].title);
     });
     it('should return an unauthorized error without an auth token', async () => {
-      await boardColumnSeed.seedOne();
+      await jobSeed.seedOne();
       const res = await request.get(baseUrl);
       expect(res.statusCode).toEqual(401);
       expect(res.body).toHaveProperty('error');
     });
   });
 
-  describe('GET /boardColumns/:id', () => {
-    it('should return a board column by id for admin user', async () => {
-      const mockBoardColumns = await boardColumnSeed.seedMany(3);
+  describe('GET /jobs/:id', () => {
+    it('should return a job by id for admin user', async () => {
+      const mockJobs = await jobSeed.seedMany(3);
       const res = await request
-        .get(`${baseUrl}/${mockBoardColumns[0].id}`)
+        .get(`${baseUrl}/${mockJobs[0].id}`)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
-      expect(res.body.id).toEqual(mockBoardColumns[0].id.toHexString());
-      expect(res.body.title).toEqual(mockBoardColumns[0].title);
+      expect(res.body.id).toEqual(mockJobs[0].id.toHexString());
+      expect(res.body.title).toEqual(mockJobs[0].title);
     });
-    it('should return a board column by id for staff user', async () => {
-      const mockBoardColumns = await boardColumnSeed.seedMany(3);
+    it('should return a job by id for staff user', async () => {
+      const mockJobs = await jobSeed.seedMany(3);
       const res = await request
-        .get(`${baseUrl}/${mockBoardColumns[0].id}`)
+        .get(`${baseUrl}/${mockJobs[0].id}`)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(200);
-      expect(res.body.id).toEqual(mockBoardColumns[0].id.toHexString());
-      expect(res.body.title).toEqual(mockBoardColumns[0].title);
+      expect(res.body.id).toEqual(mockJobs[0].id.toHexString());
+      expect(res.body.title).toEqual(mockJobs[0].title);
     });
-    it('should return a board column by id for normal user', async () => {
-      const mockBoardColumns = await boardColumnSeed.seedMany(3);
+    it('should return a job by id for normal user', async () => {
+      const mockJobs = await jobSeed.seedMany(3);
       const res = await request
-        .get(`${baseUrl}/${mockBoardColumns[0].id}`)
+        .get(`${baseUrl}/${mockJobs[0].id}`)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(200);
-      expect(res.body.id).toEqual(mockBoardColumns[0].id.toHexString());
-      expect(res.body.title).toEqual(mockBoardColumns[0].title);
+      expect(res.body.id).toEqual(mockJobs[0].id.toHexString());
+      expect(res.body.title).toEqual(mockJobs[0].title);
     });
-    it('should return an internal server error with invalid board column id', async () => {
-      const mockBoardColumn = await boardColumnSeed.seedOne();
-      const mockInvalidId = mockBoardColumn.id
-        .toHexString()
-        .split('')
-        .reverse();
+    it('should return an internal server error with invalid job id', async () => {
+      const mockJob = await jobSeed.seedOne();
+      const mockInvalidId = mockJob.id.toHexString().split('').reverse();
       const res = await request
         .get(`${baseUrl}/${mockInvalidId}`)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(500);
     });
     it('should return an unauthorized error without an auth token', async () => {
-      const mockBoardColumn = await boardColumnSeed.seedOne();
-      const res = await request.get(`${baseUrl}/${mockBoardColumn.id}`);
+      const mockJob = await jobSeed.seedOne();
+      const res = await request.get(`${baseUrl}/${mockJob.id}`);
       expect(res.statusCode).toEqual(401);
       expect(res.body).toHaveProperty('error');
     });
   });
 
-  describe('DELETE /boardColumns/:id', () => {
-    it('should successfully delete a board column by id for admin user', async () => {
-      const mockBoardColumns = await boardColumnSeed.seedMany(3);
-      const mockBoardColumnId = mockBoardColumns[0].id;
+  describe('DELETE /jobs/:id', () => {
+    it('should successfully delete a job by id for admin user', async () => {
+      const mockJobs = await jobSeed.seedMany(3);
+      const mockJobId = mockJobs[0].id;
       let res = await request
-        .delete(`${baseUrl}/${mockBoardColumnId}`)
+        .delete(`${baseUrl}/${mockJobId}`)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(204);
       res = await request.get(baseUrl).set({ Authorization: adminUserToken });
       expect(res.body.length).toEqual(2);
       res = await request
-        .get(`${baseUrl}/${mockBoardColumnId}`)
+        .get(`${baseUrl}/${mockJobId}`)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(404);
     });
     it('should return a forbidden error for staff user', async () => {
-      const mockBoardColumn = await boardColumnSeed.seedOne();
+      const mockJob = await jobSeed.seedOne();
       const res = await request
-        .delete(`${baseUrl}/${mockBoardColumn.id}`)
+        .delete(`${baseUrl}/${mockJob.id}`)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(403);
     });
     it('should return a forbidden error for normal user', async () => {
-      const mockBoardColumn = await boardColumnSeed.seedOne();
+      const mockJob = await jobSeed.seedOne();
       const res = await request
-        .delete(`${baseUrl}/${mockBoardColumn.id}`)
+        .delete(`${baseUrl}/${mockJob.id}`)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(403);
     });
     it('should return an unauthorized error without an auth token', async () => {
-      const mockBoardColumn = await boardColumnSeed.seedOne();
-      const res = await request.delete(`${baseUrl}/${mockBoardColumn.id}`);
+      const mockJob = await jobSeed.seedOne();
+      const res = await request.delete(`${baseUrl}/${mockJob.id}`);
       expect(res.statusCode).toEqual(401);
       expect(res.body).toHaveProperty('error');
     });
-    it('should return an internal server error with invalid board column id', async () => {
-      const mockBoardColumn = await boardColumnSeed.seedOne();
-      const mockInvalidId = mockBoardColumn.id
-        .toHexString()
-        .split('')
-        .reverse();
+    it('should return an internal server error with invalid job id', async () => {
+      const mockJob = await jobSeed.seedOne();
+      const mockInvalidId = mockJob.id.toHexString().split('').reverse();
       const res = await request
         .delete(`${baseUrl}/${mockInvalidId}`)
         .set({ Authorization: adminUserToken });
@@ -221,10 +205,10 @@ describe('BoardColumnsRoute', () => {
     });
   });
 
-  describe('POST /boardColumns', () => {
-    it('should successfully create a board column for admin user', async () => {
-      const mockBoardColumn = BoardColumnFactory();
-      const mockBody = { title: mockBoardColumn.title };
+  describe('POST /jobs', () => {
+    it('should successfully create a job for admin user', async () => {
+      const mockJob = JobFactory();
+      const mockBody = { title: mockJob.title };
       let res = await request
         .post(baseUrl)
         .send(mockBody)
@@ -232,16 +216,16 @@ describe('BoardColumnsRoute', () => {
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty('id');
       expect(res.body.title).toEqual(mockBody.title);
-      const boardColumnId: string = res.body.id;
+      const jobId: string = res.body.id;
       res = await request
-        .get(`${baseUrl}/${boardColumnId}`)
+        .get(`${baseUrl}/${jobId}`)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
-      expect(res.body.id).toEqual(boardColumnId);
+      expect(res.body.id).toEqual(jobId);
     });
     it('should return a forbidden error for staff user', async () => {
-      const mockBoardColumn = BoardColumnFactory();
-      const mockBody = { title: mockBoardColumn.title };
+      const mockJob = JobFactory();
+      const mockBody = { title: mockJob.title };
       const res = await request
         .post(baseUrl)
         .send(mockBody)
@@ -249,8 +233,8 @@ describe('BoardColumnsRoute', () => {
       expect(res.statusCode).toEqual(403);
     });
     it('should return a forbidden error for normal user', async () => {
-      const mockBoardColumn = BoardColumnFactory();
-      const mockBody = { title: mockBoardColumn.title };
+      const mockJob = JobFactory();
+      const mockBody = { title: mockJob.title };
       const res = await request
         .post(baseUrl)
         .send(mockBody)
@@ -258,8 +242,8 @@ describe('BoardColumnsRoute', () => {
       expect(res.statusCode).toEqual(403);
     });
     it('should return an unauthorized error without an auth token', async () => {
-      const mockBoardColumn = BoardColumnFactory();
-      const mockBody = { title: mockBoardColumn.title };
+      const mockJob = JobFactory();
+      const mockBody = { title: mockJob.title };
       const res = await request.post(baseUrl).send(mockBody);
       expect(res.statusCode).toEqual(401);
       expect(res.body).toHaveProperty('error');
@@ -280,19 +264,19 @@ describe('BoardColumnsRoute', () => {
     });
   });
 
-  describe('PATCH /boardColumns/:id', () => {
-    it('should successfully update a board column for admin user', async () => {
-      const mockBoardColumn = await boardColumnSeed.seedOne();
-      const mockBoardColumnId = mockBoardColumn.id.toHexString();
+  describe('PATCH /jobs/:id', () => {
+    it('should successfully update a job for admin user', async () => {
+      const mockJob = await jobSeed.seedOne();
+      const mockJobId = mockJob.id.toHexString();
       let res = await request
-        .get(`${baseUrl}/${mockBoardColumnId}`)
+        .get(`${baseUrl}/${mockJobId}`)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
-      expect(res.body.id).toEqual(mockBoardColumn.id.toHexString());
-      expect(res.body.title).toEqual(mockBoardColumn.title);
-      const mockBody = { title: 'mockBoardColumnTitle' };
+      expect(res.body.id).toEqual(mockJob.id.toHexString());
+      expect(res.body.title).toEqual(mockJob.title);
+      const mockBody = { title: 'mockJobTitle' };
       res = await request
-        .patch(`${baseUrl}/${mockBoardColumnId}`)
+        .patch(`${baseUrl}/${mockJobId}`)
         .send(mockBody)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
@@ -300,53 +284,51 @@ describe('BoardColumnsRoute', () => {
       expect(res.body.title).toEqual(mockBody.title);
     });
     it('should return a forbidden error for staff user', async () => {
-      const mockBoardColumn = await boardColumnSeed.seedOne();
-      const mockBoardColumnId = mockBoardColumn.id.toHexString();
-      const mockBody = { title: 'mockBoardColumnTitle' };
+      const mockJob = await jobSeed.seedOne();
+      const mockJobId = mockJob.id.toHexString();
+      const mockBody = { title: 'mockJobTitle' };
       let res = await request
-        .patch(`${baseUrl}/${mockBoardColumnId}`)
+        .patch(`${baseUrl}/${mockJobId}`)
         .send(mockBody)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(403);
       res = await request
-        .get(`${baseUrl}/${mockBoardColumnId}`)
+        .get(`${baseUrl}/${mockJobId}`)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(200);
-      expect(res.body.id).toEqual(mockBoardColumn.id.toHexString());
-      expect(res.body.title).toEqual(mockBoardColumn.title);
+      expect(res.body.id).toEqual(mockJob.id.toHexString());
+      expect(res.body.title).toEqual(mockJob.title);
     });
     it('should return a forbidden error for normal user', async () => {
-      const mockBoardColumn = await boardColumnSeed.seedOne();
-      const mockBoardColumnId = mockBoardColumn.id.toHexString();
-      const mockBody = { title: 'mockBoardColumnTitle' };
+      const mockJob = await jobSeed.seedOne();
+      const mockJobId = mockJob.id.toHexString();
+      const mockBody = { title: 'mockJobTitle' };
       let res = await request
-        .patch(`${baseUrl}/${mockBoardColumnId}`)
+        .patch(`${baseUrl}/${mockJobId}`)
         .send(mockBody)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(403);
       res = await request
-        .get(`${baseUrl}/${mockBoardColumnId}`)
+        .get(`${baseUrl}/${mockJobId}`)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(200);
-      expect(res.body.id).toEqual(mockBoardColumn.id.toHexString());
-      expect(res.body.title).toEqual(mockBoardColumn.title);
+      expect(res.body.id).toEqual(mockJob.id.toHexString());
+      expect(res.body.title).toEqual(mockJob.title);
     });
     it('should return an unauthorized error without an auth token', async () => {
-      const mockBoardColumn = await boardColumnSeed.seedOne();
-      const mockBoardColumnId = mockBoardColumn.id.toHexString();
-      const mockBody = { title: 'mockBoardColumnTitle' };
-      const res = await request
-        .patch(`${baseUrl}/${mockBoardColumnId}`)
-        .send(mockBody);
+      const mockJob = await jobSeed.seedOne();
+      const mockJobId = mockJob.id.toHexString();
+      const mockBody = { title: 'mockJobTitle' };
+      const res = await request.patch(`${baseUrl}/${mockJobId}`).send(mockBody);
       expect(res.statusCode).toEqual(401);
       expect(res.body).toHaveProperty('error');
     });
     it('should return validation error if title is not a valid string', async () => {
-      const mockBoardColumn = await boardColumnSeed.seedOne();
-      const mockBoardColumnId = mockBoardColumn.id.toHexString();
+      const mockJob = await jobSeed.seedOne();
+      const mockJobId = mockJob.id.toHexString();
       const mockBody = { title: 123 };
       const res = await request
-        .patch(`${baseUrl}/${mockBoardColumnId}`)
+        .patch(`${baseUrl}/${mockJobId}`)
         .send(mockBody)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(400);
