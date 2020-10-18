@@ -21,6 +21,6 @@ export default class BoardColumnService extends CRUD<BoardColumn> {
   }
 
   async find(): Promise<BoardColumn[]> {
-    return await super.find({ order: { id: 'ASC' } });
+    return await super.find({ order: { createdAt: 'ASC' } });
   }
 }
