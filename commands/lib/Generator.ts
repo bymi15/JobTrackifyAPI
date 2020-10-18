@@ -945,7 +945,7 @@ export default class Generator {
 
   public generateTest = async (): Promise<string> => {
     const filePath: string =
-      this.testPath + camelCase(this.entityName) + 'Service.spec.ts';
+      this.testPath + this.entityName + 'Service.spec.ts';
     await fs.writeFile(filePath, this.testCode());
     return filePath;
   };
