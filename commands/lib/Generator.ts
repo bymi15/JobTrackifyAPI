@@ -1,9 +1,11 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs').promises;
 import pluralize from 'pluralize';
 
 const camelCase = (str: string): string =>
   str.charAt(0).toLowerCase() + str.slice(1);
+
+const pascalCase = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1);
 
 const pluralizeLastWord = (str: string): string => {
   let foundIndex = 0;
@@ -25,6 +27,7 @@ export default class Generator {
   private routePath = 'src/api/routes/';
   private factoryPath = 'src/database/factories/';
   private testPath = 'test/integration/';
+  private e2ePath = 'test/e2e/routes/';
 
   constructor(
     entityName: string,
@@ -32,7 +35,8 @@ export default class Generator {
     servicePath?: string,
     routePath?: string,
     factoryPath?: string,
-    testPath?: string
+    testPath?: string,
+    e2ePath?: string
   ) {
     this.entityName = entityName;
     this.entityPath = this.entityPath || entityPath;
@@ -40,6 +44,7 @@ export default class Generator {
     this.routePath = this.routePath || routePath;
     this.factoryPath = this.factoryPath || factoryPath;
     this.testPath = this.testPath || testPath;
+    this.e2ePath = this.e2ePath || e2ePath;
   }
 
   public readEntityFields = async (): Promise<unknown> => {
@@ -418,6 +423,499 @@ export default class Generator {
     '  });\n' +
     '});\n';
 
+  private e2eCode = (fieldName: string): string =>
+    "import supertest from 'supertest';\n" +
+    "import { Connection, getConnection } from 'typeorm';\n" +
+    "import EntitySeed from '../../../src/database/seeds/EntitySeed';\n" +
+    "import server from '../../../src/server';\n" +
+    `import ${this.entityName}Factory from '../../../src/database/factories/${this.entityName}Factory';\n` +
+    "import UserFactory from '../../../src/database/factories/UserFactory';\n" +
+    "import Logger from '../../../src/logger';\n" +
+    "import Container from 'typedi';\n" +
+    `import { ${this.entityName} } from '../../../src/api/entities/${this.entityName}';\n` +
+    "import { User } from '../../../src/api/entities/User';\n" +
+    "jest.mock('../../../src/logger');\n" +
+    '\n' +
+    `describe('${this.entityName}Route', () => {\n` +
+    '  let request: any;\n' +
+    '  let connection: Connection;\n' +
+    `  let ${camelCase(this.entityName)}Seed: EntitySeed<${
+      this.entityName
+    }>;\n` +
+    `  const baseUrl = '/api/${camelCase(this.entityName)}';\n` +
+    '  let adminUserToken: string, staffUserToken: string, normalUserToken: string;\n' +
+    '  beforeAll(async () => {\n' +
+    '    const app = await server();\n' +
+    '    request = supertest(app);\n' +
+    "    Container.set('logger', Logger);\n" +
+    '    connection = getConnection();\n' +
+    '    await connection.dropDatabase();\n' +
+    `    ${camelCase(this.entityName)}Seed = new EntitySeed<${
+      this.entityName
+    }>(\n` +
+    `      connection.getMongoRepository(${this.entityName}),\n` +
+    `      ${this.entityName}Factory\n` +
+    '    );\n' +
+    '    const userSeed = new EntitySeed<User>(\n' +
+    '      connection.getMongoRepository(User),\n' +
+    '      UserFactory\n' +
+    '    );\n' +
+    '    const adminUser = await userSeed.seedOne({\n' +
+    "      role: 'admin',\n" +
+    "      password: 'adminPassword',\n" +
+    '    });\n' +
+    '    const staffUser = await userSeed.seedOne({\n' +
+    "      role: 'staff',\n" +
+    "      password: 'staffPassword',\n" +
+    '    });\n' +
+    '    const normalUser = await userSeed.seedOne({\n' +
+    "      role: 'user',\n" +
+    "      password: 'userPassword',\n" +
+    '    });\n' +
+    "    let res = await request.post('/api/auth/login').send({\n" +
+    '      email: adminUser.email,\n' +
+    "      password: 'adminPassword',\n" +
+    '    });\n' +
+    '    adminUserToken = `Bearer ${res.body.token}`;\n' +
+    "    res = await request.post('/api/auth/login').send({\n" +
+    '      email: staffUser.email,\n' +
+    "      password: 'staffPassword',\n" +
+    '    });\n' +
+    '    staffUserToken = `Bearer ${res.body.token}`;\n' +
+    "    res = await request.post('/api/auth/login').send({\n" +
+    '      email: normalUser.email,\n' +
+    "      password: 'userPassword',\n" +
+    '    });\n' +
+    '    normalUserToken = `Bearer ${res.body.token}`;\n' +
+    '  });\n' +
+    '\n' +
+    '  beforeEach(async () => {\n' +
+    '    try {\n' +
+    `      await connection.getMongoRepository(${this.entityName}).clear();\n` +
+    '    } catch (err) {}\n' +
+    '  });\n' +
+    '\n' +
+    '  afterAll(async () => {\n' +
+    '    if (connection.isConnected) {\n' +
+    '      await connection.close();\n' +
+    '    }\n' +
+    '  });\n' +
+    '\n' +
+    `  describe('GET /${camelCase(this.entityName)}', () => {\n` +
+    `    it('should return a list of ${camelCase(
+      pluralizeLastWord(this.entityName)
+    )} for admin user', async () => {\n` +
+    `      const mock${pluralizeLastWord(this.entityName)} = await ${camelCase(
+      this.entityName
+    )}Seed.seedMany(3);\n` +
+    '      const res = await request\n' +
+    '        .get(baseUrl)\n' +
+    '        .set({ Authorization: adminUserToken });\n' +
+    '      expect(res.statusCode).toEqual(200);\n' +
+    '      expect(res.body.length).toEqual(3);\n' +
+    '      expect(res.body.sort()[0].id).toEqual(\n' +
+    `        mock${pluralizeLastWord(
+      this.entityName
+    )}.sort()[0].id.toHexString()\n` +
+    '      );\n' +
+    `      expect(res.body.sort()[0].${fieldName}).toEqual(\n` +
+    `        mock${pluralizeLastWord(
+      this.entityName
+    )}.sort()[0].${fieldName}\n` +
+    '      );\n' +
+    '    });\n' +
+    `    it('should return a list of ${camelCase(
+      pluralizeLastWord(this.entityName)
+    )} for staff user', async () => {\n` +
+    `      const mock${pluralizeLastWord(this.entityName)} = await ${camelCase(
+      this.entityName
+    )}Seed.seedMany(3);\n` +
+    '      const res = await request\n' +
+    '        .get(baseUrl)\n' +
+    '        .set({ Authorization: staffUserToken });\n' +
+    '      expect(res.statusCode).toEqual(200);\n' +
+    '      expect(res.body.length).toEqual(3);\n' +
+    '      expect(res.body.sort()[0].id).toEqual(\n' +
+    `        mock${pluralizeLastWord(
+      this.entityName
+    )}.sort()[0].id.toHexString()\n` +
+    '      );\n' +
+    `      expect(res.body.sort()[0].${fieldName}).toEqual(\n` +
+    `        mock${pluralizeLastWord(
+      this.entityName
+    )}.sort()[0].${fieldName}\n` +
+    '      );\n' +
+    '    });\n' +
+    `    it('should return a list of ${camelCase(
+      pluralizeLastWord(this.entityName)
+    )} for normal user', async () => {\n` +
+    `      const mock${pluralizeLastWord(this.entityName)} = await ${camelCase(
+      this.entityName
+    )}Seed.seedMany(3);\n` +
+    '      const res = await request\n' +
+    '        .get(baseUrl)\n' +
+    '        .set({ Authorization: normalUserToken });\n' +
+    '      expect(res.statusCode).toEqual(200);\n' +
+    '      expect(res.body.length).toEqual(3);\n' +
+    '      expect(res.body.sort()[0].id).toEqual(\n' +
+    `        mock${pluralizeLastWord(
+      this.entityName
+    )}.sort()[0].id.toHexString()\n` +
+    '      );\n' +
+    `      expect(res.body.sort()[0].${fieldName}).toEqual(\n` +
+    `        mock${pluralizeLastWord(
+      this.entityName
+    )}.sort()[0].${fieldName}\n` +
+    '      );\n' +
+    '    });\n' +
+    "    it('should return an unauthorized error without an auth token', async () => {\n" +
+    `      await ${camelCase(this.entityName)}Seed.seedOne();\n` +
+    '      const res = await request.get(baseUrl);\n' +
+    '      expect(res.statusCode).toEqual(401);\n' +
+    "      expect(res.body).toHaveProperty('error');\n" +
+    '    });\n' +
+    '  });\n' +
+    '\n' +
+    `  describe('GET /${camelCase(
+      pluralizeLastWord(this.entityName)
+    )}/:id', () => {\n` +
+    `    it('should return a ${camelCase(
+      this.entityName
+    )} by id for admin user', async () => {\n` +
+    `      const mock${pluralizeLastWord(this.entityName)} = await ${camelCase(
+      this.entityName
+    )}Seed.seedMany(3);\n` +
+    '      const res = await request\n' +
+    '        .get(`${baseUrl}/${mock' +
+    pluralizeLastWord(this.entityName) +
+    '[0].id}`)\n' +
+    '        .set({ Authorization: adminUserToken });\n' +
+    '      expect(res.statusCode).toEqual(200);\n' +
+    `      expect(res.body.id).toEqual(mock${pluralizeLastWord(
+      this.entityName
+    )}[0].id.toHexString());\n` +
+    `      expect(res.body.${fieldName}).toEqual(mock${pluralizeLastWord(
+      this.entityName
+    )}[0].${fieldName});\n` +
+    '    });\n' +
+    `    it('should return a ${camelCase(
+      this.entityName
+    )} by id for staff user', async () => {\n` +
+    `      const mock${pluralizeLastWord(this.entityName)} = await ${camelCase(
+      this.entityName
+    )}Seed.seedMany(3);\n` +
+    '      const res = await request\n' +
+    '        .get(`${baseUrl}/${mock' +
+    pluralizeLastWord(this.entityName) +
+    '[0].id}`)\n' +
+    '        .set({ Authorization: staffUserToken });\n' +
+    '      expect(res.statusCode).toEqual(200);\n' +
+    `      expect(res.body.id).toEqual(mock${pluralizeLastWord(
+      this.entityName
+    )}[0].id.toHexString());\n` +
+    `      expect(res.body.${fieldName}).toEqual(mock${pluralizeLastWord(
+      this.entityName
+    )}[0].${fieldName});\n` +
+    '    });\n' +
+    `    it('should return a ${camelCase(
+      this.entityName
+    )} by id for normal user', async () => {\n` +
+    `      const mock${pluralizeLastWord(this.entityName)} = await ${camelCase(
+      this.entityName
+    )}Seed.seedMany(3);\n` +
+    '      const res = await request\n' +
+    '        .get(`${baseUrl}/${mock' +
+    pluralizeLastWord(this.entityName) +
+    '[0].id}`)\n' +
+    '        .set({ Authorization: normalUserToken });\n' +
+    '      expect(res.statusCode).toEqual(200);\n' +
+    `      expect(res.body.id).toEqual(mock${pluralizeLastWord(
+      this.entityName
+    )}[0].id.toHexString());\n` +
+    `      expect(res.body.${fieldName}).toEqual(mock${pluralizeLastWord(
+      this.entityName
+    )}[0].${fieldName});\n` +
+    '    });\n' +
+    `    it('should return an internal server error with invalid ${camelCase(
+      this.entityName
+    )} id', async () => {\n` +
+    `      const mock${this.entityName} = await ${camelCase(
+      this.entityName
+    )}Seed.seedOne();\n` +
+    `      const mockInvalidId = mock${this.entityName}.id\n` +
+    '        .toHexString()\n' +
+    "        .split('')\n" +
+    '        .reverse();\n' +
+    '      const res = await request\n' +
+    '        .get(`${baseUrl}/${mockInvalidId}`)\n' +
+    '        .set({ Authorization: staffUserToken });\n' +
+    '      expect(res.statusCode).toEqual(500);\n' +
+    '    });\n' +
+    "    it('should return an unauthorized error without an auth token', async () => {\n" +
+    `      const mock${this.entityName} = await ${camelCase(
+      this.entityName
+    )}Seed.seedOne();\n` +
+    '      const res = await request.get(`${baseUrl}/${mock' +
+    this.entityName +
+    '.id}`);\n' +
+    '      expect(res.statusCode).toEqual(401);\n' +
+    "      expect(res.body).toHaveProperty('error');\n" +
+    '    });\n' +
+    '  });\n' +
+    '\n' +
+    `  describe('DELETE /${camelCase(
+      pluralizeLastWord(this.entityName)
+    )}/:id', () => {\n` +
+    `    it('should successfully delete a ${camelCase(
+      this.entityName
+    )} by id for admin user', async () => {\n` +
+    `      const mock${pluralizeLastWord(this.entityName)} = await ${camelCase(
+      this.entityName
+    )}Seed.seedMany(3);\n` +
+    `      const mock${this.entityName}Id = mock${pluralizeLastWord(
+      this.entityName
+    )}[0].id;\n` +
+    '      let res = await request\n' +
+    '        .delete(`${baseUrl}/${mock' +
+    this.entityName +
+    'Id}`)\n' +
+    '        .set({ Authorization: adminUserToken });\n' +
+    '      expect(res.statusCode).toEqual(204);\n' +
+    '      res = await request.get(baseUrl).set({ Authorization: adminUserToken });\n' +
+    '      expect(res.body.length).toEqual(2);\n' +
+    '      res = await request\n' +
+    '        .get(`${baseUrl}/${mock' +
+    this.entityName +
+    'Id}`)\n' +
+    '        .set({ Authorization: adminUserToken });\n' +
+    '      expect(res.statusCode).toEqual(404);\n' +
+    '    });\n' +
+    "    it('should return a forbidden error for staff user', async () => {\n" +
+    `      const mock${this.entityName} = await ${camelCase(
+      this.entityName
+    )}Seed.seedOne();\n` +
+    '      const res = await request\n' +
+    '        .delete(`${baseUrl}/${mock' +
+    this.entityName +
+    '.id}`)\n' +
+    '        .set({ Authorization: staffUserToken });\n' +
+    '      expect(res.statusCode).toEqual(403);\n' +
+    '    });\n' +
+    "    it('should return a forbidden error for normal user', async () => {\n" +
+    `      const mock${this.entityName} = await ${camelCase(
+      this.entityName
+    )}Seed.seedOne();\n` +
+    '      const res = await request\n' +
+    '        .delete(`${baseUrl}/${mock' +
+    this.entityName +
+    '.id}`)\n' +
+    '        .set({ Authorization: normalUserToken });\n' +
+    '      expect(res.statusCode).toEqual(403);\n' +
+    '    });\n' +
+    "    it('should return an unauthorized error without an auth token', async () => {\n" +
+    `      const mock${this.entityName} = await ${camelCase(
+      this.entityName
+    )}Seed.seedOne();\n` +
+    '      const res = await request.delete(`${baseUrl}/${mock' +
+    this.entityName +
+    '.id}`);\n' +
+    '      expect(res.statusCode).toEqual(401);\n' +
+    "      expect(res.body).toHaveProperty('error');\n" +
+    '    });\n' +
+    `    it('should return an internal server error with invalid ${camelCase(
+      this.entityName
+    )} id', async () => {\n` +
+    `      const mock${this.entityName} = await ${camelCase(
+      this.entityName
+    )}Seed.seedOne();\n` +
+    `      const mockInvalidId = mock${this.entityName}.id\n` +
+    '        .toHexString()\n' +
+    "        .split('')\n" +
+    '        .reverse();\n' +
+    '      const res = await request\n' +
+    '        .delete(`${baseUrl}/${mockInvalidId}`)\n' +
+    '        .set({ Authorization: adminUserToken });\n' +
+    '      expect(res.statusCode).toEqual(500);\n' +
+    '    });\n' +
+    '  });\n' +
+    '\n' +
+    `  describe('POST /${camelCase(
+      pluralizeLastWord(this.entityName)
+    )}', () => {\n` +
+    `    it('should successfully create a ${camelCase(
+      this.entityName
+    )} for admin user', async () => {\n` +
+    `      const mock${this.entityName} = ${this.entityName}Factory();\n` +
+    `      const mockBody = { ${fieldName}: mock${this.entityName}.${fieldName} };\n` +
+    '      let res = await request\n' +
+    '        .post(baseUrl)\n' +
+    '        .send(mockBody)\n' +
+    '        .set({ Authorization: adminUserToken });\n' +
+    '      expect(res.statusCode).toEqual(201);\n' +
+    "      expect(res.body).toHaveProperty('id');\n" +
+    `      expect(res.body.${fieldName}).toEqual(mockBody.${fieldName});\n` +
+    `      const ${camelCase(this.entityName)}Id: string = res.body.id;\n` +
+    '      res = await request\n' +
+    '        .get(`${baseUrl}/${' +
+    camelCase(this.entityName) +
+    'Id}`)\n' +
+    '        .set({ Authorization: adminUserToken });\n' +
+    '      expect(res.statusCode).toEqual(200);\n' +
+    `      expect(res.body.id).toEqual(${camelCase(this.entityName)}Id);\n` +
+    '    });\n' +
+    "    it('should return a forbidden error for staff user', async () => {\n" +
+    `      const mock${this.entityName} = ${this.entityName}Factory();\n` +
+    `      const mockBody = { ${fieldName}: mock${this.entityName}.${fieldName} };\n` +
+    '      const res = await request\n' +
+    '        .post(baseUrl)\n' +
+    '        .send(mockBody)\n' +
+    '        .set({ Authorization: staffUserToken });\n' +
+    '      expect(res.statusCode).toEqual(403);\n' +
+    '    });\n' +
+    "    it('should return a forbidden error for normal user', async () => {\n" +
+    `      const mock${this.entityName} = ${this.entityName}Factory();\n` +
+    `      const mockBody = { ${fieldName}: mock${this.entityName}.${fieldName} };\n` +
+    '      const res = await request\n' +
+    '        .post(baseUrl)\n' +
+    '        .send(mockBody)\n' +
+    '        .set({ Authorization: normalUserToken });\n' +
+    '      expect(res.statusCode).toEqual(403);\n' +
+    '    });\n' +
+    "    it('should return an unauthorized error without an auth token', async () => {\n" +
+    `      const mock${this.entityName} = ${this.entityName}Factory();\n` +
+    `      const mockBody = { ${fieldName}: mock${this.entityName}.${fieldName} };\n` +
+    '      const res = await request.post(baseUrl).send(mockBody);\n' +
+    '      expect(res.statusCode).toEqual(401);\n' +
+    "      expect(res.body).toHaveProperty('error');\n" +
+    '    });\n' +
+    `    it('should return a validation error if the ${fieldName} field is missing', async () => {\n` +
+    '      let res = await request\n' +
+    '        .post(baseUrl)\n' +
+    `        .send({ ${fieldName}: '' })\n` +
+    '        .set({ Authorization: adminUserToken });\n' +
+    '      expect(res.statusCode).toEqual(400);\n' +
+    "      expect(res.body).toHaveProperty('error');\n" +
+    '      res = await request\n' +
+    '        .post(baseUrl)\n' +
+    '        .send({})\n' +
+    '        .set({ Authorization: adminUserToken });\n' +
+    '      expect(res.statusCode).toEqual(400);\n' +
+    "      expect(res.body).toHaveProperty('error');\n" +
+    '    });\n' +
+    '  });\n' +
+    '\n' +
+    `  describe('PATCH /${camelCase(
+      pluralizeLastWord(this.entityName)
+    )}/:id', () => {\n` +
+    `    it('should successfully update a ${camelCase(
+      this.entityName
+    )} for admin user', async () => {\n` +
+    `      const mock${this.entityName} = await ${camelCase(
+      this.entityName
+    )}Seed.seedOne();\n` +
+    `      const mock${this.entityName}Id = mock${this.entityName}.id.toHexString();\n` +
+    '      let res = await request\n' +
+    '        .get(`${baseUrl}/${mock' +
+    this.entityName +
+    'Id}`)\n' +
+    '        .set({ Authorization: adminUserToken });\n' +
+    '      expect(res.statusCode).toEqual(200);\n' +
+    `      expect(res.body.id).toEqual(mock${this.entityName}.id.toHexString());\n` +
+    `      expect(res.body.${fieldName}).toEqual(mock${this.entityName}.${fieldName});\n` +
+    `      const mockBody = { ${fieldName}: 'mock${this.entityName}${pascalCase(
+      fieldName
+    )}' };\n` +
+    '      res = await request\n' +
+    '        .patch(`${baseUrl}/${mock' +
+    this.entityName +
+    'Id}`)\n' +
+    '        .send(mockBody)\n' +
+    '        .set({ Authorization: adminUserToken });\n' +
+    '      expect(res.statusCode).toEqual(200);\n' +
+    "      expect(res.body).toHaveProperty('id');\n" +
+    `      expect(res.body.${fieldName}).toEqual(mockBody.${fieldName});\n` +
+    '    });\n' +
+    "    it('should return a forbidden error for staff user', async () => {\n" +
+    `      const mock${this.entityName} = await ${camelCase(
+      this.entityName
+    )}Seed.seedOne();\n` +
+    `      const mock${this.entityName}Id = mock${this.entityName}.id.toHexString();\n` +
+    `      const mockBody = { ${fieldName}: 'mock${this.entityName}${pascalCase(
+      fieldName
+    )}' };\n` +
+    '      let res = await request\n' +
+    '        .patch(`${baseUrl}/${mock' +
+    this.entityName +
+    'Id}`)\n' +
+    '        .send(mockBody)\n' +
+    '        .set({ Authorization: staffUserToken });\n' +
+    '      expect(res.statusCode).toEqual(403);\n' +
+    '      res = await request\n' +
+    '        .get(`${baseUrl}/${mock' +
+    this.entityName +
+    'Id}`)\n' +
+    '        .set({ Authorization: staffUserToken });\n' +
+    '      expect(res.statusCode).toEqual(200);\n' +
+    `      expect(res.body.id).toEqual(mock${this.entityName}.id.toHexString());\n` +
+    `      expect(res.body.${fieldName}).toEqual(mock${this.entityName}.${fieldName});\n` +
+    '    });\n' +
+    "    it('should return a forbidden error for normal user', async () => {\n" +
+    `      const mock${this.entityName} = await ${camelCase(
+      this.entityName
+    )}Seed.seedOne();\n` +
+    `      const mock${this.entityName}Id = mock${this.entityName}.id.toHexString();\n` +
+    `      const mockBody = { ${fieldName}: 'mock${this.entityName}${pascalCase(
+      fieldName
+    )}' };\n` +
+    '      let res = await request\n' +
+    '        .patch(`${baseUrl}/${mock' +
+    this.entityName +
+    'Id}`)\n' +
+    '        .send(mockBody)\n' +
+    '        .set({ Authorization: normalUserToken });\n' +
+    '      expect(res.statusCode).toEqual(403);\n' +
+    '      res = await request\n' +
+    '        .get(`${baseUrl}/${mock' +
+    this.entityName +
+    'Id}`)\n' +
+    '        .set({ Authorization: normalUserToken });\n' +
+    '      expect(res.statusCode).toEqual(200);\n' +
+    `      expect(res.body.id).toEqual(mock${this.entityName}.id.toHexString());\n` +
+    `      expect(res.body.${fieldName}).toEqual(mock${this.entityName}.${fieldName});\n` +
+    '    });\n' +
+    "    it('should return an unauthorized error without an auth token', async () => {\n" +
+    `      const mock${this.entityName} = await ${camelCase(
+      this.entityName
+    )}Seed.seedOne();\n` +
+    `      const mock${this.entityName}Id = mock${this.entityName}.id.toHexString();\n` +
+    `      const mockBody = { ${fieldName}: 'mock${this.entityName}${pascalCase(
+      fieldName
+    )}' };\n` +
+    '      const res = await request\n' +
+    '        .patch(`${baseUrl}/${mock' +
+    this.entityName +
+    'Id}`)\n' +
+    '        .send(mockBody);\n' +
+    '      expect(res.statusCode).toEqual(401);\n' +
+    "      expect(res.body).toHaveProperty('error');\n" +
+    '    });\n' +
+    `    it('should return validation error if ${fieldName} is not a valid string', async () => {\n` +
+    `      const mock${this.entityName} = await ${camelCase(
+      this.entityName
+    )}Seed.seedOne();\n` +
+    `      const mock${this.entityName}Id = mock${this.entityName}.id.toHexString();\n` +
+    `      const mockBody = { ${fieldName}: 123 };\n` +
+    '      const res = await request\n' +
+    '        .patch(`${baseUrl}/${mock' +
+    this.entityName +
+    'Id}`)\n' +
+    '        .send(mockBody)\n' +
+    '        .set({ Authorization: adminUserToken });\n' +
+    '      expect(res.statusCode).toEqual(400);\n' +
+    "      expect(res.body).toHaveProperty('error');\n" +
+    '    });\n' +
+    '  });\n' +
+    '});\n';
   public generateEntity = async (fields: string): Promise<string> => {
     const filePath: string = this.entityPath + this.entityName + '.ts';
     await fs.writeFile(filePath, this.entityCode(fields));
@@ -449,6 +947,14 @@ export default class Generator {
     const filePath: string =
       this.testPath + camelCase(this.entityName) + 'Service.spec.ts';
     await fs.writeFile(filePath, this.testCode());
+    return filePath;
+  };
+
+  public generateE2E = async (): Promise<string> => {
+    const fields = this.fields || (await this.readEntityFields());
+    const filePath: string =
+      this.e2ePath + camelCase(pluralizeLastWord(this.entityName)) + '.spec.ts';
+    await fs.writeFile(filePath, this.e2eCode(Object.keys(fields)[0]));
     return filePath;
   };
 }
