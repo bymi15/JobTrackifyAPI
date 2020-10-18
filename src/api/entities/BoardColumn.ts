@@ -10,6 +10,10 @@ export class BoardColumn {
   @IsString()
   title?: string;
 
+  @Column()
+  @IsString()
+  createdAt?: string = new Date().toISOString();
+
   public constructor(data?: BoardColumn) {
     if (data) {
       this.title = data.title;
