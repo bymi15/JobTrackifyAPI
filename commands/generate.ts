@@ -51,6 +51,10 @@ commander
       filePath = await gen.generateTest();
       log('Test has been generated successfully!');
       log(`Path: ${filePath}`);
+
+      filePath = await gen.generateE2E();
+      log('End to end tests has been generated successfully!');
+      log(`Path: ${filePath}\n`);
     } catch (err) {
       log(err);
     }
