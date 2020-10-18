@@ -67,6 +67,37 @@ describe('CRUD', () => {
       expect(response).toBeDefined();
       expect(response.sort()).toEqual(mockCompanies.sort());
     });
+    test('Should find all the entities ordering by field', async () => {
+      const mockCompanies = await entitySeed.seedMany(5);
+      mockCompanies.sort((a, b) =>
+        a.createdAt > b.createdAt ? 1 : b.createdAt > a.createdAt ? -1 : 0
+      );
+      const responseA = await crudInstance.find({
+        order: { createdAt: 'ASC' },
+      });
+      expect(responseA).toEqual(mockCompanies);
+      mockCompanies.sort((a, b) =>
+        a.createdAt < b.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0
+      );
+      const responseB = await crudInstance.find({
+        order: { createdAt: 'DESC' },
+      });
+      expect(responseB).toEqual(mockCompanies);
+      expect(responseA.reverse()).toEqual(responseB);
+    });
+    test('Should find all the entities querying by field', async () => {
+      await entitySeed.seedMany(2);
+      const mockCompanies = await entitySeed.seedMany(3, {
+        headquarters: { city: 'mockCity', country: 'mockCountry' },
+      });
+      const response = await crudInstance.find({
+        where: {
+          'headquarters.city': { $eq: 'mockCity' },
+        },
+      });
+      expect(response.length).toEqual(3);
+      expect(response.sort()).toEqual(mockCompanies.sort());
+    });
   });
 
   describe('findOne', () => {
@@ -140,6 +171,22 @@ describe('CRUD', () => {
       }
       expect(res).toBeUndefined();
       expect(err).toEqual(new ErrorHandler(404, 'Not found'));
+    });
+  });
+
+  describe('count', () => {
+    test('Should return the number of all entities', async () => {
+      await entitySeed.seedMany(3);
+      const response = await crudInstance.count();
+      expect(response).toBeDefined();
+      expect(response).toEqual(3);
+    });
+    test('Should return the number of entities given a query', async () => {
+      await entitySeed.seedOne({ name: 'mockCompanyName' });
+      await entitySeed.seedMany(3);
+      const response = await crudInstance.count({ name: 'mockCompanyName' });
+      expect(response).toBeDefined();
+      expect(response).toEqual(1);
     });
   });
 });
