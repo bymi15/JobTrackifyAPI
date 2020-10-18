@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Service } from 'typedi';
-import { FindManyOptions, MongoRepository, ObjectLiteral } from 'typeorm';
+import {
+  FindManyOptions,
+  FindOneOptions,
+  MongoRepository,
+  ObjectLiteral,
+} from 'typeorm';
 import { Logger } from 'winston';
 import { validate } from 'class-validator';
 import { ErrorHandler } from '../../helpers/ErrorHandler';
@@ -56,6 +61,10 @@ export default class CRUD<Entity> {
     return await this.repo.save(entity);
   }
 
+  async count(query?: ObjectLiteral): Promise<number> {
+    return await this.repo.count(query);
+  }
+
   async find(options?: FindManyOptions<Entity>): Promise<Entity[]> {
     const entities = await this.repo.find(options);
     if (entities) {
@@ -64,8 +73,10 @@ export default class CRUD<Entity> {
     throw new ErrorHandler(404, 'Not found');
   }
 
-  async findOne(id: string): Promise<Entity | undefined> {
-    const entity = await this.repo.findOne(id);
+  async findOne(
+    idOrOptions: string | FindOneOptions<Entity>
+  ): Promise<Entity | undefined> {
+    const entity = await this.repo.findOne(idOrOptions);
     if (entity) {
       return entity;
     }
