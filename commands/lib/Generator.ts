@@ -442,7 +442,9 @@ export default class Generator {
     `  let ${camelCase(this.entityName)}Seed: EntitySeed<${
       this.entityName
     }>;\n` +
-    `  const baseUrl = '/api/${camelCase(this.entityName)}';\n` +
+    `  const baseUrl = '/api/${camelCase(
+      pluralizeLastWord(this.entityName)
+    )}';\n` +
     '  let adminUserToken: string, staffUserToken: string, normalUserToken: string;\n' +
     '  beforeAll(async () => {\n' +
     '    const app = await server();\n' +
@@ -501,7 +503,9 @@ export default class Generator {
     '    }\n' +
     '  });\n' +
     '\n' +
-    `  describe('GET /${camelCase(this.entityName)}', () => {\n` +
+    `  describe('GET /${camelCase(
+      pluralizeLastWord(this.entityName)
+    )}', () => {\n` +
     `    it('should return a list of ${camelCase(
       pluralizeLastWord(this.entityName)
     )} for admin user', async () => {\n` +
