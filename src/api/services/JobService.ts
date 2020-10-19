@@ -55,8 +55,7 @@ export default class JobService extends CRUD<Job> {
       board: job.board,
       boardColumn: job.boardColumn,
     });
-    job.index = count + 1;
-    job.sortOrder = job.index * 1000;
+    job.sortOrder = (count + 1) * 1000;
     const savedJob = await super.create(job);
     await this.fillCompanyField(savedJob);
     await this.fillBoardColumnField(savedJob);
@@ -178,7 +177,7 @@ export default class JobService extends CRUD<Job> {
     // Can no longer divide sort order in half - need to reset sortOrder to current index * 1000
     if (newSortOrder === minSortOrder || newSortOrder === maxSortOrder) {
       await this.alignSortOrder();
-      await this.move(id, boardColumn, prevJobId);
+      return await this.move(id, boardColumn, prevJobId);
     } else {
       return await this.update(id, {
         sortOrder: newSortOrder,
