@@ -14,7 +14,7 @@ export default class BoardSeed {
 
   public async seedOne(data?: Board): Promise<Board> {
     data = data || new Board();
-    data.owner = this.owner;
+    data.owner = data.owner || this.owner;
     return await this.boardSeed.seedOne(data);
   }
 

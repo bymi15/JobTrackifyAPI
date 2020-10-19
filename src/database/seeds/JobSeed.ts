@@ -26,19 +26,19 @@ export default class JobSeed {
 
   public async seedOne(data?: Job): Promise<Job> {
     data = data || new Job();
-    data.company = this.company;
-    data.board = this.board;
-    data.boardColumn = this.boardColumn;
-    data.owner = this.owner;
+    data.company = data.company || this.company;
+    data.board = data.board || this.board;
+    data.boardColumn = data.boardColumn || this.boardColumn;
+    data.owner = data.owner || this.owner;
     return await this.jobSeed.seedOne(data);
   }
 
-  public async seedMany(amount: number): Promise<Job[]> {
-    return await this.jobSeed.seedMany(amount, {
-      company: this.company,
-      board: this.board,
-      boardColumn: this.boardColumn,
-      owner: this.owner,
-    });
+  public async seedMany(amount: number, data?: Job): Promise<Job[]> {
+    data = data || new Job();
+    data.company = data.company || this.company;
+    data.board = data.board || this.board;
+    data.boardColumn = data.boardColumn || this.boardColumn;
+    data.owner = data.owner || this.owner;
+    return await this.jobSeed.seedMany(amount, data);
   }
 }
