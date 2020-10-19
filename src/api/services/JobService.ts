@@ -5,7 +5,6 @@ import { MongoRepository, ObjectID, ObjectLiteral } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Logger } from 'winston';
 import CRUD from './CRUD';
-import UserService from './UserService';
 import CompanyService from './CompanyService';
 import BoardService from './BoardService';
 import BoardColumnService from './BoardColumnService';
