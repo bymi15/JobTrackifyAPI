@@ -56,7 +56,7 @@ route.get('/board/:id', isAuth, attachUser, async (req, res, next) => {
   }
 });
 
-route.get('/:id', isAuth, async (req, res, next) => {
+route.get('/:id', isAuth, attachUser, async (req, res, next) => {
   const logger: Logger = Container.get('logger');
   logger.debug('Calling GET to /jobs/:id endpoint with id: %s', req.params.id);
   try {
@@ -131,6 +131,7 @@ route.post(
 route.patch(
   '/:id',
   isAuth,
+  attachUser,
   celebrate({
     body: Joi.object({
       company: Joi.string(),
@@ -146,8 +147,19 @@ route.patch(
     logger.debug('Calling PATCH to /jobs/:id endpoint with body: %o', req.body);
     try {
       const jobServiceInstance = Container.get(JobService);
-      const job = await jobServiceInstance.update(req.params.id, req.body);
-      return res.status(200).json(job);
+      const job = await jobServiceInstance.getRepo().findOne(req.params.id);
+      if (!job) return res.sendStatus(500);
+      if (
+        req.currentUser.role !== 'admin' &&
+        !(job.owner as ObjectID).equals(req.currentUser.id)
+      ) {
+        return res.sendStatus(403);
+      }
+      const updatedJob = await jobServiceInstance.update(
+        req.params.id,
+        req.body
+      );
+      return res.status(200).json(updatedJob);
     } catch (e) {
       return next(e);
     }
@@ -157,6 +169,7 @@ route.patch(
 route.patch(
   '/:id/move',
   isAuth,
+  attachUser,
   celebrate({
     body: Joi.object({
       boardColumn: Joi.string().required(),
@@ -165,15 +178,26 @@ route.patch(
   }),
   async (req, res, next) => {
     const logger: Logger = Container.get('logger');
-    logger.debug('Calling PATCH to /jobs/:id endpoint with body: %o', req.body);
+    logger.debug(
+      'Calling PATCH to /jobs/:id/move endpoint with body: %o',
+      req.body
+    );
     try {
       const jobServiceInstance = Container.get(JobService);
-      const job = await jobServiceInstance.move(
+      const job = await jobServiceInstance.getRepo().findOne(req.params.id);
+      if (!job) return res.sendStatus(500);
+      if (
+        req.currentUser.role !== 'admin' &&
+        !(job.owner as ObjectID).equals(req.currentUser.id)
+      ) {
+        return res.sendStatus(403);
+      }
+      const updatedJob = await jobServiceInstance.move(
         req.params.id,
         req.body.boardColumn,
         req.body.prevJobId
       );
-      return res.status(200).json(job);
+      return res.status(200).json(updatedJob);
     } catch (e) {
       return next(e);
     }
