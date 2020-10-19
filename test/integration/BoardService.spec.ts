@@ -45,7 +45,7 @@ describe('BoardService', () => {
   });
 
   describe('create', () => {
-    test('Should successfully create and return a board with owner filled by User object', async () => {
+    test('Should successfully create and return a board', async () => {
       const mockBoard = BoardFactory({
         owner: mockUser.id,
       });
@@ -53,8 +53,6 @@ describe('BoardService', () => {
       expect(response).toBeDefined();
       expect(response.id).toBeDefined();
       expect(response.title).toEqual(mockBoard.title);
-      expect(response.owner).toBeDefined();
-      expect(response.owner).toEqual(mockUser);
     });
   });
 

@@ -83,7 +83,6 @@ describe('CRUD', () => {
         order: { createdAt: 'DESC' },
       });
       expect(responseB).toEqual(mockCompanies);
-      expect(responseA.reverse()).toEqual(responseB);
     });
     test('Should find all the entities querying by field', async () => {
       await entitySeed.seedMany(2);
