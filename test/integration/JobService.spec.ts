@@ -6,11 +6,11 @@ import Logger from '../../src/logger';
 import JobFactory from '../../src/database/factories/JobFactory';
 import { Job } from '../../src/api/entities/Job';
 import JobSeed from '../../src/database/seeds/JobSeed';
+import BoardSeed from '../../src/database/seeds/BoardSeed';
 import EntitySeed from '../../src/database/seeds/EntitySeed';
 import { Company } from '../../src/api/entities/Company';
 import CompanyFactory from '../../src/database/factories/CompanyFactory';
 import UserFactory from '../../src/database/factories/UserFactory';
-import BoardFactory from '../../src/database/factories/BoardFactory';
 import BoardColumnFactory from '../../src/database/factories/BoardColumnFactory';
 import { User } from '../../src/api/entities/User';
 import { Board } from '../../src/api/entities/Board';
@@ -25,6 +25,9 @@ describe('JobService', () => {
     mockBoardColumnA: BoardColumn,
     mockBoardColumnB: BoardColumn,
     mockUser: User;
+  let userSeed: EntitySeed<User>;
+  let boardColumnSeed: EntitySeed<BoardColumn>;
+  let companySeed: EntitySeed<Company>;
   let jobSeed: JobSeed;
   let jobServiceInstance: JobService;
   beforeAll(async () => {
@@ -33,34 +36,32 @@ describe('JobService', () => {
     await connection.synchronize(true);
     Container.set('logger', Logger);
     jobServiceInstance = Container.get(JobService);
+    companySeed = new EntitySeed<Company>(
+      connection.getMongoRepository(Company),
+      CompanyFactory
+    );
+    userSeed = new EntitySeed<User>(
+      connection.getMongoRepository(User),
+      UserFactory
+    );
+    boardColumnSeed = new EntitySeed<BoardColumn>(
+      connection.getMongoRepository(BoardColumn),
+      BoardColumnFactory
+    );
   });
 
   beforeEach(async () => {
     await connection.dropDatabase();
-    mockUser = await new EntitySeed<User>(
-      connection.getMongoRepository(User),
-      UserFactory
-    ).seedOne();
-    mockCompany = await new EntitySeed<Company>(
-      connection.getMongoRepository(Company),
-      CompanyFactory
-    ).seedOne();
-    mockBoardA = await new EntitySeed<Board>(
+    mockUser = await userSeed.seedOne();
+    mockCompany = await companySeed.seedOne();
+    const boardSeed = new BoardSeed(
       connection.getMongoRepository(Board),
-      BoardFactory
-    ).seedOne({ owner: mockUser.id });
-    mockBoardB = await new EntitySeed<Board>(
-      connection.getMongoRepository(Board),
-      BoardFactory
-    ).seedOne({ owner: mockUser.id });
-    mockBoardColumnA = await new EntitySeed<BoardColumn>(
-      connection.getMongoRepository(BoardColumn),
-      BoardColumnFactory
-    ).seedOne();
-    mockBoardColumnB = await new EntitySeed<BoardColumn>(
-      connection.getMongoRepository(BoardColumn),
-      BoardColumnFactory
-    ).seedOne();
+      mockUser.id
+    );
+    mockBoardA = await boardSeed.seedOne();
+    mockBoardB = await boardSeed.seedOne();
+    mockBoardColumnA = await boardColumnSeed.seedOne();
+    mockBoardColumnB = await boardColumnSeed.seedOne();
     jobSeed = new JobSeed(
       connection.getMongoRepository(Job),
       mockCompany.id,
@@ -187,7 +188,7 @@ describe('JobService', () => {
         index: 3,
         sortOrder: 1000,
       });
-      const response = await jobServiceInstance.findByBoardAndColumn(
+      let response = await jobServiceInstance.findByBoardAndColumn(
         mockJob1.board as ObjectID,
         mockJob1.boardColumn as ObjectID
       );
@@ -197,16 +198,45 @@ describe('JobService', () => {
       expect(response[1].id).toEqual(mockJob1.id);
       expect(response[2].id).toEqual(mockJob2.id);
 
-      const mockNewJob = JobFactory({
+      let mockNewJob = JobFactory({
         company: mockJob1.company,
         board: mockJob1.board,
         boardColumn: mockBoardColumnB.id,
         owner: mockJob1.owner,
-      });
-      const mockJob4 = await jobSeed.seedOne({
-        index: 3,
+        index: 1,
         sortOrder: 1000,
       });
+      await jobSeed.seedOne(mockNewJob);
+      response = await jobServiceInstance.findByBoardAndColumn(
+        mockJob1.board as ObjectID,
+        mockJob1.boardColumn as ObjectID
+      );
+      expect(response).toBeDefined();
+      expect(response.length).toEqual(3);
+      response = await jobServiceInstance.findByBoardAndColumn(
+        mockNewJob.board as ObjectID,
+        mockNewJob.boardColumn as ObjectID
+      );
+      expect(response).toBeDefined();
+      expect(response.length).toEqual(1);
+      expect(response[0].title).toEqual(mockNewJob.title);
+
+      mockNewJob = JobFactory({
+        company: mockJob1.company,
+        board: mockBoardB,
+        boardColumn: mockJob1.boardColumn,
+        owner: mockJob1.owner,
+        index: 1,
+        sortOrder: 1000,
+      });
+      await jobSeed.seedOne(mockNewJob);
+      response = await jobServiceInstance.findByBoardAndColumn(
+        mockNewJob.board as ObjectID,
+        mockNewJob.boardColumn as ObjectID
+      );
+      expect(response).toBeDefined();
+      expect(response.length).toEqual(1);
+      expect(response[0].title).toEqual(mockNewJob.title);
     });
   });
   describe('move', () => {
@@ -223,22 +253,31 @@ describe('JobService', () => {
         index: 3,
         sortOrder: 3000,
       });
+      const jobs = await jobServiceInstance.findByBoardAndColumn(
+        mockJob1.board as ObjectID,
+        mockJob1.boardColumn as ObjectID
+      );
+      expect(jobs).toBeDefined();
+      expect(jobs.length).toEqual(3);
+      expect(jobs[0].id).toEqual(mockJob1.id);
+      expect(jobs[1].id).toEqual(mockJob2.id);
+      expect(jobs[2].id).toEqual(mockJob3.id);
+
       //move 3 to 1
       const response = await jobServiceInstance.move(
         mockJob3.id.toHexString(),
         (mockJob3.boardColumn as ObjectID).toHexString()
       );
-      console.log(JSON.stringify(response));
       expect(response).toBeDefined();
       expect(response.sortOrder).toEqual(500);
+      expect(response.board as ObjectID).toEqual(mockJob1.board as ObjectID);
       expect((response.boardColumn as BoardColumn).id).toEqual(
-        mockJob3.boardColumn as ObjectID
+        mockJob1.boardColumn as ObjectID
       );
       const newJobs = await jobServiceInstance.findByBoardAndColumn(
         mockJob1.board as ObjectID,
         mockJob1.boardColumn as ObjectID
       );
-      console.log(JSON.stringify(newJobs));
       expect(newJobs).toBeDefined();
       expect(newJobs.length).toEqual(3);
       expect(newJobs[0].id).toEqual(mockJob3.id);

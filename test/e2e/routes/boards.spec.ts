@@ -90,12 +90,15 @@ describe('BoardsRoute', () => {
   describe('GET /boards', () => {
     it('should return a list of boards for admin user', async () => {
       const mockBoards = await normalBoardSeed.seedMany(3);
+      mockBoards.sort((a, b) =>
+        a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+      );
       const res = await request
         .get(baseUrl)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.length).toEqual(3);
-      expect(res.body.sort()[0].title).toEqual(mockBoards.sort()[0].title);
+      expect(res.body[0].title).toEqual(mockBoards[0].title);
     });
     it('should return a forbidden error for staff user', async () => {
       const res = await request
@@ -129,34 +132,43 @@ describe('BoardsRoute', () => {
       await normalBoardSeed.seedOne();
       await staffBoardSeed.seedOne();
       const mockBoards = await adminBoardSeed.seedMany(3);
+      mockBoards.sort((a, b) =>
+        a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+      );
       const res = await request
         .get(ownerUrl)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.length).toEqual(3);
-      expect(res.body.sort()[0].title).toEqual(mockBoards.sort()[0].title);
+      expect(res.body[0].title).toEqual(mockBoards[0].title);
     });
     it('should return a list of boards by owner for staff user', async () => {
       await normalBoardSeed.seedOne();
       await adminBoardSeed.seedOne();
       const mockBoards = await staffBoardSeed.seedMany(3);
+      mockBoards.sort((a, b) =>
+        a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+      );
       const res = await request
         .get(ownerUrl)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.length).toEqual(3);
-      expect(res.body.sort()[0].title).toEqual(mockBoards.sort()[0].title);
+      expect(res.body[0].title).toEqual(mockBoards[0].title);
     });
     it('should return a list of boards by owner for normal user', async () => {
       await adminBoardSeed.seedOne();
       await staffBoardSeed.seedOne();
       const mockBoards = await normalBoardSeed.seedMany(3);
+      mockBoards.sort((a, b) =>
+        a.createdAt > b.createdAt ? -1 : a.createdAt < b.createdAt ? 1 : 0
+      );
       const res = await request
         .get(ownerUrl)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.length).toEqual(3);
-      expect(res.body.sort()[0].title).toEqual(mockBoards.sort()[0].title);
+      expect(res.body[0].title).toEqual(mockBoards[0].title);
     });
     it('should return an unauthorized error without an auth token', async () => {
       const res = await request.get(ownerUrl);
@@ -390,8 +402,6 @@ describe('BoardsRoute', () => {
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty('id');
-      expect(res.body).toHaveProperty('owner');
-      expect(res.body.owner).toHaveProperty('id');
       expect(res.body).toHaveProperty('createdAt');
       expect(res.body).toHaveProperty('updatedAt');
       expect(res.body.title).toEqual(mockBody.title);
@@ -411,8 +421,6 @@ describe('BoardsRoute', () => {
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty('id');
-      expect(res.body).toHaveProperty('owner');
-      expect(res.body.owner).toHaveProperty('id');
       expect(res.body).toHaveProperty('createdAt');
       expect(res.body).toHaveProperty('updatedAt');
       expect(res.body.title).toEqual(mockBody.title);
@@ -432,8 +440,6 @@ describe('BoardsRoute', () => {
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty('id');
-      expect(res.body).toHaveProperty('owner');
-      expect(res.body.owner).toHaveProperty('id');
       expect(res.body).toHaveProperty('createdAt');
       expect(res.body).toHaveProperty('updatedAt');
       expect(res.body.title).toEqual(mockBody.title);

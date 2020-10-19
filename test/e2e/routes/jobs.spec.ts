@@ -1,6 +1,8 @@
 import supertest from 'supertest';
 import { Connection, getConnection } from 'typeorm';
 import EntitySeed from '../../../src/database/seeds/EntitySeed';
+import JobSeed from '../../../src/database/seeds/JobSeed';
+import BoardSeed from '../../../src/database/seeds/BoardSeed';
 import server from '../../../src/server';
 import JobFactory from '../../../src/database/factories/JobFactory';
 import UserFactory from '../../../src/database/factories/UserFactory';
@@ -8,37 +10,51 @@ import Logger from '../../../src/logger';
 import Container from 'typedi';
 import { Job } from '../../../src/api/entities/Job';
 import { User } from '../../../src/api/entities/User';
+import { Company } from '../../../src/api/entities/Company';
+import { BoardColumn } from '../../../src/api/entities/BoardColumn';
+import CompanyFactory from '../../../src/database/factories/CompanyFactory';
+import BoardColumnFactory from '../../../src/database/factories/BoardColumnFactory';
+import { Board } from '../../../src/api/entities/Board';
 jest.mock('../../../src/logger');
 
 describe('JobRoute', () => {
   let request: any;
   let connection: Connection;
-  let jobSeed: EntitySeed<Job>;
-  const baseUrl = '/api/job';
+  let boardColumnSeed: EntitySeed<BoardColumn>;
+  let companySeed: EntitySeed<Company>;
+  let jobSeed: JobSeed;
+  const baseUrl = '/api/jobs';
   let adminUserToken: string, staffUserToken: string, normalUserToken: string;
+  let adminUser: User, staffUser: User, normalUser: User;
+  let adminBoard: Board, staffBoard: Board, normalBoard: Board;
+  let mockCompany: Company, mockBoardColumn: BoardColumn;
   beforeAll(async () => {
     const app = await server();
     request = supertest(app);
     Container.set('logger', Logger);
     connection = getConnection();
     await connection.dropDatabase();
-    jobSeed = new EntitySeed<Job>(
-      connection.getMongoRepository(Job),
-      JobFactory
+    companySeed = new EntitySeed<Company>(
+      connection.getMongoRepository(Company),
+      CompanyFactory
+    );
+    boardColumnSeed = new EntitySeed<BoardColumn>(
+      connection.getMongoRepository(BoardColumn),
+      BoardColumnFactory
     );
     const userSeed = new EntitySeed<User>(
       connection.getMongoRepository(User),
       UserFactory
     );
-    const adminUser = await userSeed.seedOne({
+    adminUser = await userSeed.seedOne({
       role: 'admin',
       password: 'adminPassword',
     });
-    const staffUser = await userSeed.seedOne({
+    staffUser = await userSeed.seedOne({
       role: 'staff',
       password: 'staffPassword',
     });
-    const normalUser = await userSeed.seedOne({
+    normalUser = await userSeed.seedOne({
       role: 'user',
       password: 'userPassword',
     });
@@ -62,7 +78,31 @@ describe('JobRoute', () => {
   beforeEach(async () => {
     try {
       await connection.getMongoRepository(Job).clear();
+      await connection.getMongoRepository(Company).clear();
+      await connection.getMongoRepository(Board).clear();
+      await connection.getMongoRepository(BoardColumn).clear();
     } catch (err) {}
+    mockCompany = await companySeed.seedOne();
+    adminBoard = await new BoardSeed(
+      connection.getMongoRepository(Board),
+      adminUser.id
+    ).seedOne();
+    staffBoard = await new BoardSeed(
+      connection.getMongoRepository(Board),
+      staffUser.id
+    ).seedOne();
+    normalBoard = await new BoardSeed(
+      connection.getMongoRepository(Board),
+      normalUser.id
+    ).seedOne();
+    mockBoardColumn = await boardColumnSeed.seedOne();
+    jobSeed = new JobSeed(
+      connection.getMongoRepository(Job),
+      mockCompany.id,
+      adminBoard.id,
+      mockBoardColumn.id,
+      adminUser.id
+    );
   });
 
   afterAll(async () => {
@@ -71,42 +111,31 @@ describe('JobRoute', () => {
     }
   });
 
-  describe('GET /job', () => {
-    it('should return a list of jobs for admin user', async () => {
+  describe('GET /jobs', () => {
+    it('should return a list of all jobs in order for admin user', async () => {
       const mockJobs = await jobSeed.seedMany(3);
+      mockJobs.sort((a, b) =>
+        a.sortOrder < b.sortOrder ? -1 : a.sortOrder > b.sortOrder ? 1 : 0
+      );
       const res = await request
         .get(baseUrl)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.length).toEqual(3);
-      expect(res.body.sort()[0].id).toEqual(
-        mockJobs.sort()[0].id.toHexString()
-      );
-      expect(res.body.sort()[0].title).toEqual(mockJobs.sort()[0].title);
+      expect(res.body[0].id).toEqual(mockJobs[0].id.toHexString());
+      expect(res.body[0].title).toEqual(mockJobs[0].title);
     });
-    it('should return a list of jobs for staff user', async () => {
-      const mockJobs = await jobSeed.seedMany(3);
+    it('should return a forbidden error for staff user', async () => {
       const res = await request
         .get(baseUrl)
         .set({ Authorization: staffUserToken });
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.length).toEqual(3);
-      expect(res.body.sort()[0].id).toEqual(
-        mockJobs.sort()[0].id.toHexString()
-      );
-      expect(res.body.sort()[0].title).toEqual(mockJobs.sort()[0].title);
+      expect(res.statusCode).toEqual(403);
     });
-    it('should return a list of jobs for normal user', async () => {
-      const mockJobs = await jobSeed.seedMany(3);
+    it('should return a forbidden error for normal user', async () => {
       const res = await request
         .get(baseUrl)
         .set({ Authorization: normalUserToken });
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.length).toEqual(3);
-      expect(res.body.sort()[0].id).toEqual(
-        mockJobs.sort()[0].id.toHexString()
-      );
-      expect(res.body.sort()[0].title).toEqual(mockJobs.sort()[0].title);
+      expect(res.statusCode).toEqual(403);
     });
     it('should return an unauthorized error without an auth token', async () => {
       await jobSeed.seedOne();
@@ -127,7 +156,10 @@ describe('JobRoute', () => {
       expect(res.body.title).toEqual(mockJobs[0].title);
     });
     it('should return a job by id for staff user', async () => {
-      const mockJobs = await jobSeed.seedMany(3);
+      const mockJobs = await jobSeed.seedMany(3, {
+        board: staffBoard.id,
+        owner: staffUser.id,
+      });
       const res = await request
         .get(`${baseUrl}/${mockJobs[0].id}`)
         .set({ Authorization: staffUserToken });
@@ -136,7 +168,10 @@ describe('JobRoute', () => {
       expect(res.body.title).toEqual(mockJobs[0].title);
     });
     it('should return a job by id for normal user', async () => {
-      const mockJobs = await jobSeed.seedMany(3);
+      const mockJobs = await jobSeed.seedMany(3, {
+        board: normalBoard.id,
+        owner: normalUser.id,
+      });
       const res = await request
         .get(`${baseUrl}/${mockJobs[0].id}`)
         .set({ Authorization: normalUserToken });
@@ -168,26 +203,52 @@ describe('JobRoute', () => {
         .delete(`${baseUrl}/${mockJobId}`)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(204);
-      res = await request.get(baseUrl).set({ Authorization: adminUserToken });
+      res = await request
+        .get(`${baseUrl}/user`)
+        .set({ Authorization: adminUserToken });
       expect(res.body.length).toEqual(2);
       res = await request
         .get(`${baseUrl}/${mockJobId}`)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(404);
     });
-    it('should return a forbidden error for staff user', async () => {
-      const mockJob = await jobSeed.seedOne();
-      const res = await request
-        .delete(`${baseUrl}/${mockJob.id}`)
+    it('should successfully delete a job by id for staff user', async () => {
+      const mockJobs = await jobSeed.seedMany(3, {
+        board: staffBoard.id,
+        owner: staffUser.id,
+      });
+      const mockJobId = mockJobs[0].id;
+      let res = await request
+        .delete(`${baseUrl}/${mockJobId}`)
         .set({ Authorization: staffUserToken });
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(204);
+      res = await request
+        .get(`${baseUrl}/user`)
+        .set({ Authorization: staffUserToken });
+      expect(res.body.length).toEqual(2);
+      res = await request
+        .get(`${baseUrl}/${mockJobId}`)
+        .set({ Authorization: staffUserToken });
+      expect(res.statusCode).toEqual(404);
     });
-    it('should return a forbidden error for normal user', async () => {
-      const mockJob = await jobSeed.seedOne();
-      const res = await request
-        .delete(`${baseUrl}/${mockJob.id}`)
+    it('should successfully delete a job by id for normal user', async () => {
+      const mockJobs = await jobSeed.seedMany(3, {
+        board: normalBoard.id,
+        owner: normalUser.id,
+      });
+      const mockJobId = mockJobs[0].id;
+      let res = await request
+        .delete(`${baseUrl}/${mockJobId}`)
         .set({ Authorization: normalUserToken });
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(204);
+      res = await request
+        .get(`${baseUrl}/user`)
+        .set({ Authorization: normalUserToken });
+      expect(res.body.length).toEqual(2);
+      res = await request
+        .get(`${baseUrl}/${mockJobId}`)
+        .set({ Authorization: normalUserToken });
+      expect(res.statusCode).toEqual(404);
     });
     it('should return an unauthorized error without an auth token', async () => {
       const mockJob = await jobSeed.seedOne();
@@ -207,8 +268,12 @@ describe('JobRoute', () => {
 
   describe('POST /jobs', () => {
     it('should successfully create a job for admin user', async () => {
-      const mockJob = JobFactory();
-      const mockBody = { title: mockJob.title };
+      const mockBody = {
+        company: mockCompany.id,
+        board: adminBoard.id,
+        boardColumn: mockBoardColumn.id,
+        title: JobFactory().title,
+      };
       let res = await request
         .post(baseUrl)
         .send(mockBody)
@@ -223,27 +288,56 @@ describe('JobRoute', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.id).toEqual(jobId);
     });
-    it('should return a forbidden error for staff user', async () => {
-      const mockJob = JobFactory();
-      const mockBody = { title: mockJob.title };
-      const res = await request
+    it('should successfully create a job for staff user', async () => {
+      const mockBody = {
+        company: mockCompany.id,
+        board: staffBoard.id,
+        boardColumn: mockBoardColumn.id,
+        title: JobFactory().title,
+      };
+      let res = await request
         .post(baseUrl)
         .send(mockBody)
         .set({ Authorization: staffUserToken });
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(201);
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.title).toEqual(mockBody.title);
+      const jobId: string = res.body.id;
+      res = await request
+        .get(`${baseUrl}/${jobId}`)
+        .set({ Authorization: staffUserToken });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.id).toEqual(jobId);
     });
-    it('should return a forbidden error for normal user', async () => {
-      const mockJob = JobFactory();
-      const mockBody = { title: mockJob.title };
-      const res = await request
+    it('should successfully create a job for normal user', async () => {
+      const mockBody = {
+        company: mockCompany.id,
+        board: normalBoard.id,
+        boardColumn: mockBoardColumn.id,
+        title: JobFactory().title,
+      };
+      let res = await request
         .post(baseUrl)
         .send(mockBody)
         .set({ Authorization: normalUserToken });
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(201);
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.title).toEqual(mockBody.title);
+      const jobId: string = res.body.id;
+      res = await request
+        .get(`${baseUrl}/${jobId}`)
+        .set({ Authorization: normalUserToken });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.id).toEqual(jobId);
     });
     it('should return an unauthorized error without an auth token', async () => {
       const mockJob = JobFactory();
-      const mockBody = { title: mockJob.title };
+      const mockBody = {
+        company: mockJob.company,
+        board: mockJob.board,
+        boardColumn: mockJob.boardColumn,
+        title: mockJob.title,
+      };
       const res = await request.post(baseUrl).send(mockBody);
       expect(res.statusCode).toEqual(401);
       expect(res.body).toHaveProperty('error');
@@ -283,37 +377,47 @@ describe('JobRoute', () => {
       expect(res.body).toHaveProperty('id');
       expect(res.body.title).toEqual(mockBody.title);
     });
-    it('should return a forbidden error for staff user', async () => {
-      const mockJob = await jobSeed.seedOne();
+    it('should successfully update a job for staff user', async () => {
+      const mockJob = await jobSeed.seedOne({
+        board: staffBoard.id,
+        owner: staffUser.id,
+      });
       const mockJobId = mockJob.id.toHexString();
-      const mockBody = { title: 'mockJobTitle' };
       let res = await request
-        .patch(`${baseUrl}/${mockJobId}`)
-        .send(mockBody)
-        .set({ Authorization: staffUserToken });
-      expect(res.statusCode).toEqual(403);
-      res = await request
         .get(`${baseUrl}/${mockJobId}`)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.id).toEqual(mockJob.id.toHexString());
       expect(res.body.title).toEqual(mockJob.title);
+      const mockBody = { title: 'mockJobTitle' };
+      res = await request
+        .patch(`${baseUrl}/${mockJobId}`)
+        .send(mockBody)
+        .set({ Authorization: staffUserToken });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.title).toEqual(mockBody.title);
     });
-    it('should return a forbidden error for normal user', async () => {
-      const mockJob = await jobSeed.seedOne();
+    it('should successfully update a job for normal user', async () => {
+      const mockJob = await jobSeed.seedOne({
+        board: normalBoard.id,
+        owner: normalUser.id,
+      });
       const mockJobId = mockJob.id.toHexString();
-      const mockBody = { title: 'mockJobTitle' };
       let res = await request
-        .patch(`${baseUrl}/${mockJobId}`)
-        .send(mockBody)
-        .set({ Authorization: normalUserToken });
-      expect(res.statusCode).toEqual(403);
-      res = await request
         .get(`${baseUrl}/${mockJobId}`)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.id).toEqual(mockJob.id.toHexString());
       expect(res.body.title).toEqual(mockJob.title);
+      const mockBody = { title: 'mockJobTitle' };
+      res = await request
+        .patch(`${baseUrl}/${mockJobId}`)
+        .send(mockBody)
+        .set({ Authorization: normalUserToken });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.title).toEqual(mockBody.title);
     });
     it('should return an unauthorized error without an auth token', async () => {
       const mockJob = await jobSeed.seedOne();

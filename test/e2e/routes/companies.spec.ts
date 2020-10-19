@@ -78,30 +78,45 @@ describe('CompaniesRoute', () => {
   describe('GET /companies', () => {
     it('should return a list of companies for admin user', async () => {
       const mockCompanies = await companySeed.seedMany(3);
+      mockCompanies.sort((a, b) => {
+        const A = a.name.toUpperCase();
+        const B = b.name.toUpperCase();
+        return A < B ? -1 : A > B ? 1 : 0;
+      });
       const res = await request
         .get(baseUrl)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.length).toEqual(3);
-      expect(res.body.sort()[0].name).toEqual(mockCompanies.sort()[0].name);
+      expect(res.body[0].name).toEqual(mockCompanies[0].name);
     });
     it('should return a list of companies for staff user', async () => {
       const mockCompanies = await companySeed.seedMany(3);
+      mockCompanies.sort((a, b) => {
+        const A = a.name.toUpperCase();
+        const B = b.name.toUpperCase();
+        return A < B ? -1 : A > B ? 1 : 0;
+      });
       const res = await request
         .get(baseUrl)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.length).toEqual(3);
-      expect(res.body.sort()[0].name).toEqual(mockCompanies.sort()[0].name);
+      expect(res.body[0].name).toEqual(mockCompanies[0].name);
     });
     it('should return a list of companies for normal user', async () => {
       const mockCompanies = await companySeed.seedMany(3);
+      mockCompanies.sort((a, b) => {
+        const A = a.name.toUpperCase();
+        const B = b.name.toUpperCase();
+        return A < B ? -1 : A > B ? 1 : 0;
+      });
       const res = await request
         .get(baseUrl)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(200);
       expect(res.body.length).toEqual(3);
-      expect(res.body.sort()[0].name).toEqual(mockCompanies.sort()[0].name);
+      expect(res.body[0].name).toEqual(mockCompanies[0].name);
     });
     it('should return an unauthorized error without an auth token', async () => {
       await companySeed.seedOne();
