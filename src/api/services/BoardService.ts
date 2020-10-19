@@ -23,7 +23,7 @@ export default class BoardService extends CRUD<Board> {
 
   async create(board: Board): Promise<Board> {
     const savedBoard = await super.create(board);
-    await this.fillOwnerWithUser(savedBoard);
+    Reflect.deleteProperty(savedBoard, 'owner');
     return savedBoard;
   }
 

@@ -1,7 +1,7 @@
 import Container, { Inject, Service } from 'typedi';
+import { ObjectID as mongoObjectID } from 'mongodb';
 import { Job } from '../entities/Job';
 import { MongoRepository, ObjectID, ObjectLiteral } from 'typeorm';
-import { ObjectID as mongoObjectId } from 'mongodb';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Logger } from 'winston';
 import CRUD from './CRUD';
@@ -9,7 +9,6 @@ import UserService from './UserService';
 import CompanyService from './CompanyService';
 import BoardService from './BoardService';
 import BoardColumnService from './BoardColumnService';
-import { ErrorHandler } from '../../helpers/ErrorHandler';
 
 @Service()
 export default class JobService extends CRUD<Job> {
@@ -22,19 +21,22 @@ export default class JobService extends CRUD<Job> {
     super(repo, logger);
   }
 
-  private async fillAllObjects(job: Job): Promise<void> {
+  private async fillCompanyField(job: Job): Promise<void> {
     await super.fillObjectIdField(
       job,
       'company',
       Container.get(CompanyService)
     );
+  }
+  private async fillBoardField(job: Job): Promise<void> {
     await super.fillObjectIdField(job, 'board', Container.get(BoardService));
+  }
+  private async fillBoardColumnField(job: Job): Promise<void> {
     await super.fillObjectIdField(
       job,
       'boardColumn',
       Container.get(BoardColumnService)
     );
-    await super.fillObjectIdField(job, 'owner', Container.get(UserService));
   }
 
   private async alignSortOrder(): Promise<void> {
@@ -57,11 +59,16 @@ export default class JobService extends CRUD<Job> {
     job.index = count + 1;
     job.sortOrder = job.index * 1000;
     const savedJob = await super.create(job);
-    await this.fillAllObjects(savedJob);
+    await this.fillCompanyField(savedJob);
+    await this.fillBoardColumnField(savedJob);
+    Reflect.deleteProperty(savedJob, 'owner');
     return savedJob;
   }
 
-  async findByOwner(owner: ObjectID): Promise<Job[]> {
+  async findByOwner(owner: string | ObjectID): Promise<Job[]> {
+    if (typeof owner === 'string') {
+      owner = new mongoObjectID(owner) as ObjectID;
+    }
     const jobs: Job[] = await super.find({
       where: {
         owner: { $eq: owner },
@@ -69,12 +76,18 @@ export default class JobService extends CRUD<Job> {
       order: { sortOrder: 'ASC' },
     });
     for (const job of jobs) {
+      await this.fillCompanyField(job);
+      await this.fillBoardField(job);
+      await this.fillBoardColumnField(job);
       Reflect.deleteProperty(job, 'owner');
     }
     return jobs;
   }
 
-  async findByBoard(board: string): Promise<Job[]> {
+  async findByBoard(board: string | ObjectID): Promise<Job[]> {
+    if (typeof board === 'string') {
+      board = new mongoObjectID(board) as ObjectID;
+    }
     const jobs: Job[] = await super.find({
       where: {
         board: { $eq: board },
@@ -84,6 +97,34 @@ export default class JobService extends CRUD<Job> {
     for (const job of jobs) {
       Reflect.deleteProperty(job, 'owner');
       Reflect.deleteProperty(job, 'board');
+      await this.fillCompanyField(job);
+      await this.fillBoardColumnField(job);
+    }
+    return jobs;
+  }
+
+  async findByBoardAndColumn(
+    board: string | ObjectID,
+    boardColumn: string | ObjectID
+  ): Promise<Job[]> {
+    if (typeof board === 'string') {
+      board = new mongoObjectID(board) as ObjectID;
+    }
+    if (typeof boardColumn === 'string') {
+      boardColumn = new mongoObjectID(boardColumn) as ObjectID;
+    }
+    const jobs: Job[] = await super.find({
+      where: {
+        board: { $eq: board },
+        boardColumn: { $eq: boardColumn },
+      },
+      order: { sortOrder: 'ASC' },
+    });
+    for (const job of jobs) {
+      Reflect.deleteProperty(job, 'owner');
+      Reflect.deleteProperty(job, 'board');
+      Reflect.deleteProperty(job, 'boardColumn');
+      await this.fillCompanyField(job);
     }
     return jobs;
   }
@@ -91,33 +132,39 @@ export default class JobService extends CRUD<Job> {
   async find(): Promise<Job[]> {
     const jobs: Job[] = await super.find({ order: { sortOrder: 'ASC' } });
     for (const job of jobs) {
-      await this.fillAllObjects(job);
+      await this.fillCompanyField(job);
+      await this.fillBoardField(job);
+      await this.fillBoardColumnField(job);
+      Reflect.deleteProperty(job, 'owner');
     }
     return jobs;
   }
 
   async findOne(id: string): Promise<Job | undefined> {
     const job = await super.findOne(id);
-    await this.fillAllObjects(job);
+    await this.fillCompanyField(job);
+    await this.fillBoardField(job);
+    await this.fillBoardColumnField(job);
+    Reflect.deleteProperty(job, 'owner');
     return job;
   }
 
   async update(id: string, updatedFields: ObjectLiteral): Promise<Job> {
     const updatedJob = await super.update(id, updatedFields);
-    await this.fillAllObjects(updatedJob);
+    await this.fillCompanyField(updatedJob);
+    await this.fillBoardColumnField(updatedJob);
+    Reflect.deleteProperty(updatedJob, 'owner');
     return updatedJob;
   }
 
   async move(id: string, boardColumn: string, prevJobId?: string) {
-    const currentJob = await super.findOne(id);
+    const jobId = new mongoObjectID(id) as ObjectID;
     const prevJob = prevJobId && (await super.findOne(prevJobId));
     const minSortOrder = (prevJob && prevJob.sortOrder) || 0;
     const temp = await super.find({
       where: {
-        $and: [
-          { sortOrder: { $gt: minSortOrder } },
-          { id: { $not: { $eq: currentJob.id } } },
-        ],
+        sortOrder: { $gt: minSortOrder },
+        id: { $not: { $eq: jobId } },
       },
       order: {
         sortOrder: 'ASC',
@@ -136,7 +183,7 @@ export default class JobService extends CRUD<Job> {
     } else {
       return await this.update(id, {
         sortOrder: newSortOrder,
-        boardColumn: boardColumn,
+        boardColumn: new mongoObjectID(boardColumn) as ObjectID,
       });
     }
   }
