@@ -6,7 +6,6 @@ import { Logger } from 'winston';
 import { Job } from '../entities/Job';
 import { attachUser, checkRole, isAuth } from '../middlewares';
 import { ObjectID } from 'typeorm';
-import { User } from '../entities/User';
 import BoardService from '../services/BoardService';
 
 const route = Router();
@@ -62,10 +61,11 @@ route.get('/:id', isAuth, attachUser, async (req, res, next) => {
   try {
     const jobServiceInstance = Container.get(JobService);
     const job = await jobServiceInstance.findOne(req.params.id);
-    const jobOwner = job.owner as User;
+    const jobOwner = (await jobServiceInstance.getRepo().findOne(req.params.id))
+      .owner as ObjectID;
     if (
       req.currentUser.role !== 'admin' &&
-      !jobOwner.id.equals(req.currentUser.id)
+      !jobOwner.equals(req.currentUser.id)
     ) {
       return res.sendStatus(403);
     }
@@ -116,7 +116,7 @@ route.post(
   }),
   async (req, res, next) => {
     const logger: Logger = Container.get('logger');
-    logger.debug('Calling POST to /jobs/:id endpoint with body: %o', req.body);
+    logger.debug('Calling POST to /jobs endpoint with body: %o', req.body);
     try {
       const jobServiceInstance = Container.get(JobService);
       req.body.owner = req.currentUser.id;
