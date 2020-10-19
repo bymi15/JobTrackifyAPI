@@ -15,7 +15,6 @@ export default (data?: Job): Job => {
     location:
       (data && data.location) ||
       `${faker.address.city()}, ${faker.address.country()}`,
-    index: (data && data.index) || faker.random.number(),
     sortOrder: (data && data.sortOrder) || faker.random.number(),
     dateApplied: (data && data.dateApplied) || faker.date.past().toUTCString(),
     owner: (data && data.owner) || (new mongoObjectID() as ObjectID),

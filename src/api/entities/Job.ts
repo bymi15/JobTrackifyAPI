@@ -6,7 +6,6 @@ import { BoardColumn } from './BoardColumn';
 import { Board } from './Board';
 
 @Entity()
-@Index(['board', 'boardColumn', 'index'], { unique: true })
 @Index(['board', 'boardColumn', 'sortOrder'], { unique: true })
 export class Job {
   @ObjectIdColumn()
@@ -45,10 +44,6 @@ export class Job {
 
   @Column()
   @IsNumber()
-  index?: number;
-
-  @Column()
-  @IsNumber()
   sortOrder?: number;
 
   @Column()
@@ -77,7 +72,6 @@ export class Job {
       this.description = data.description;
       this.postUrl = data.postUrl;
       this.location = data.location;
-      this.index = data.index;
       this.sortOrder = data.sortOrder;
       this.dateApplied = data.dateApplied;
       this.owner = data.owner;
