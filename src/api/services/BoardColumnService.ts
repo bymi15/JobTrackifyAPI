@@ -17,10 +17,20 @@ export default class BoardColumnService extends CRUD<BoardColumn> {
   }
 
   async create(boardColumn: BoardColumn): Promise<BoardColumn> {
-    return await super.create(boardColumn, 'title');
+    const res = await super.create(boardColumn, 'title');
+    Reflect.deleteProperty(res, 'createdAt');
+    return res;
   }
 
   async find(): Promise<BoardColumn[]> {
-    return await super.find({ order: { createdAt: 'ASC' } });
+    const res = await super.find({ order: { createdAt: 'ASC' } });
+    Reflect.deleteProperty(res, 'createdAt');
+    return res;
+  }
+
+  async findOne(id: string): Promise<BoardColumn> {
+    const res = await super.findOne(id);
+    Reflect.deleteProperty(res, 'createdAt');
+    return res;
   }
 }

@@ -1,7 +1,7 @@
 import { Container } from 'typedi';
 import JobService from '../../src/api/services/JobService';
 import databaseLoader from '../../src/loaders/database';
-import { Connection } from 'typeorm';
+import { Connection, ObjectID } from 'typeorm';
 import Logger from '../../src/logger';
 import JobFactory from '../../src/database/factories/JobFactory';
 import { Job } from '../../src/api/entities/Job';
@@ -147,6 +147,103 @@ describe('JobService', () => {
       expect(response).toBeDefined();
       expect(response.index).toEqual(4);
       expect(response.sortOrder).toEqual(4000);
+    });
+  });
+  describe('findByBoard', () => {
+    test('Should return a list of jobs by board id in ascending order of sortOrder', async () => {
+      const mockJob1 = await jobSeed.seedOne({
+        index: 1,
+        sortOrder: 2000,
+      });
+      const mockJob2 = await jobSeed.seedOne({
+        index: 2,
+        sortOrder: 3000,
+      });
+      const mockJob3 = await jobSeed.seedOne({
+        index: 3,
+        sortOrder: 1000,
+      });
+      const response = await jobServiceInstance.findByBoard(
+        mockJob1.board as ObjectID
+      );
+      expect(response).toBeDefined();
+      expect(response.length).toEqual(3);
+      expect(response[0].id).toEqual(mockJob3.id);
+      expect(response[1].id).toEqual(mockJob1.id);
+      expect(response[2].id).toEqual(mockJob2.id);
+    });
+  });
+  describe('findByBoardAndColumn', () => {
+    test('Should return a list of jobs by board id and board column id', async () => {
+      const mockJob1 = await jobSeed.seedOne({
+        index: 1,
+        sortOrder: 2000,
+      });
+      const mockJob2 = await jobSeed.seedOne({
+        index: 2,
+        sortOrder: 3000,
+      });
+      const mockJob3 = await jobSeed.seedOne({
+        index: 3,
+        sortOrder: 1000,
+      });
+      const response = await jobServiceInstance.findByBoardAndColumn(
+        mockJob1.board as ObjectID,
+        mockJob1.boardColumn as ObjectID
+      );
+      expect(response).toBeDefined();
+      expect(response.length).toEqual(3);
+      expect(response[0].id).toEqual(mockJob3.id);
+      expect(response[1].id).toEqual(mockJob1.id);
+      expect(response[2].id).toEqual(mockJob2.id);
+
+      const mockNewJob = JobFactory({
+        company: mockJob1.company,
+        board: mockJob1.board,
+        boardColumn: mockBoardColumnB.id,
+        owner: mockJob1.owner,
+      });
+      const mockJob4 = await jobSeed.seedOne({
+        index: 3,
+        sortOrder: 1000,
+      });
+    });
+  });
+  describe('move', () => {
+    test('Should move a job from bottom to top in the same column', async () => {
+      const mockJob1 = await jobSeed.seedOne({
+        index: 1,
+        sortOrder: 1000,
+      });
+      const mockJob2 = await jobSeed.seedOne({
+        index: 2,
+        sortOrder: 2000,
+      });
+      const mockJob3 = await jobSeed.seedOne({
+        index: 3,
+        sortOrder: 3000,
+      });
+      //move 3 to 1
+      const response = await jobServiceInstance.move(
+        mockJob3.id.toHexString(),
+        (mockJob3.boardColumn as ObjectID).toHexString()
+      );
+      console.log(JSON.stringify(response));
+      expect(response).toBeDefined();
+      expect(response.sortOrder).toEqual(500);
+      expect((response.boardColumn as BoardColumn).id).toEqual(
+        mockJob3.boardColumn as ObjectID
+      );
+      const newJobs = await jobServiceInstance.findByBoardAndColumn(
+        mockJob1.board as ObjectID,
+        mockJob1.boardColumn as ObjectID
+      );
+      console.log(JSON.stringify(newJobs));
+      expect(newJobs).toBeDefined();
+      expect(newJobs.length).toEqual(3);
+      expect(newJobs[0].id).toEqual(mockJob3.id);
+      expect(newJobs[1].id).toEqual(mockJob1.id);
+      expect(newJobs[2].id).toEqual(mockJob2.id);
     });
   });
 });
