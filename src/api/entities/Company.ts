@@ -1,5 +1,5 @@
 import { Entity, ObjectIdColumn, Column, Index, ObjectID } from 'typeorm';
-import { IsUrl, IsString, IsNumberString } from 'class-validator';
+import { IsUrl, IsString, IsNumberString, IsOptional } from 'class-validator';
 
 @Entity()
 export class Company {
@@ -12,23 +12,28 @@ export class Company {
   name?: string;
 
   @Column()
+  @IsOptional()
   description?: string;
 
   @Column()
+  @IsOptional()
   @IsUrl()
   logo?: string;
 
   @Column()
+  @IsOptional()
   @IsUrl()
   website?: string;
 
   @Column()
+  @IsOptional()
   headquarters?: {
     city?: string;
     country?: string;
   };
 
   @Column()
+  @IsOptional()
   @IsString()
   industry?: string;
 

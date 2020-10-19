@@ -1,5 +1,5 @@
 import { Entity, ObjectIdColumn, Column, ObjectID, Index } from 'typeorm';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsOptional } from 'class-validator';
 import { User } from './User';
 import { Company } from './Company';
 import { BoardColumn } from './BoardColumn';
@@ -29,14 +29,17 @@ export class Job {
   title?: string;
 
   @Column()
+  @IsOptional()
   @IsString()
   description?: string;
 
   @Column()
+  @IsOptional()
   @IsString()
   postUrl?: string;
 
   @Column()
+  @IsOptional()
   @IsString()
   location?: string;
 
@@ -49,6 +52,7 @@ export class Job {
   sortOrder?: number;
 
   @Column()
+  @IsOptional()
   @IsString()
   dateApplied?: string;
 
