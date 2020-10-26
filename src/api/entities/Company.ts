@@ -38,6 +38,7 @@ export class Company {
   industry?: string;
 
   @Column()
+  @IsOptional()
   @IsNumberString()
   foundedYear?: string;
 
