@@ -1,4 +1,4 @@
-import { Entity, ObjectIdColumn, Column, ObjectID, Index } from 'typeorm';
+import { Entity, ObjectIdColumn, Column, ObjectID } from 'typeorm';
 import { IsNotEmpty, IsNumber, IsString, IsOptional } from 'class-validator';
 import { User } from './User';
 import { Company } from './Company';
@@ -6,7 +6,7 @@ import { BoardColumn } from './BoardColumn';
 import { Board } from './Board';
 
 @Entity()
-@Index(['board', 'boardColumn', 'sortOrder'], { unique: true })
+// @Index(['board', 'boardColumn', 'company', 'title'], { unique: true })
 export class Job {
   @ObjectIdColumn()
   id?: ObjectID;
