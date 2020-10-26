@@ -6,6 +6,7 @@ import { Logger } from 'winston';
 import { Job } from '../entities/Job';
 import { attachUser, checkRole, isAuth } from '../middlewares';
 import { ObjectID } from 'typeorm';
+import { ObjectID as mongoObjectID } from 'mongodb';
 import BoardService from '../services/BoardService';
 
 const route = Router();
@@ -48,7 +49,7 @@ route.get('/board/:id', isAuth, attachUser, async (req, res, next) => {
     ) {
       return res.sendStatus(403);
     }
-    const jobs = await jobServiceInstance.findByBoard(req.params.id);
+    const jobs = await jobServiceInstance.findByBoard(board.id);
     return res.status(200).json(jobs);
   } catch (e) {
     return next(e);
@@ -120,6 +121,11 @@ route.post(
     try {
       const jobServiceInstance = Container.get(JobService);
       req.body.owner = req.currentUser.id;
+      req.body.board = new mongoObjectID(req.body.board) as ObjectID;
+      req.body.boardColumn = new mongoObjectID(
+        req.body.boardColumn
+      ) as ObjectID;
+      req.body.company = new mongoObjectID(req.body.company) as ObjectID;
       const job = await jobServiceInstance.create(new Job(req.body));
       return res.status(201).json(job);
     } catch (e) {

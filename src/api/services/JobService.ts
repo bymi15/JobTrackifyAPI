@@ -1,5 +1,5 @@
 import Container, { Inject, Service } from 'typedi';
-import { ObjectID as mongoObjectID } from 'mongodb';
+import { ObjectId as mongoObjectID } from 'mongodb';
 import { Job } from '../entities/Job';
 import { MongoRepository, ObjectID, ObjectLiteral } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
@@ -90,7 +90,7 @@ export default class JobService extends CRUD<Job> {
       where: {
         board: { $eq: board },
       },
-      order: { sortOrder: 'ASC' },
+      order: { boardColumn: 'ASC', sortOrder: 'ASC' },
     });
     for (const job of jobs) {
       Reflect.deleteProperty(job, 'owner');

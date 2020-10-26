@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { Logger } from 'winston';
 import { Container } from 'typedi';
-import { isAuth, attachUser, checkRole } from '../middlewares';
+import { isAuth, checkRole } from '../middlewares';
 import UserService from '../services/UserService';
 
 const route = Router();
@@ -22,12 +22,6 @@ route.get(
     }
   }
 );
-
-route.get('/current', isAuth, attachUser, (req: Request, res: Response) => {
-  const logger: Logger = Container.get('logger');
-  logger.debug('Calling GET to /users/current endpoint');
-  return res.json(req.currentUser).status(200);
-});
 
 route.get(
   '/:id',
