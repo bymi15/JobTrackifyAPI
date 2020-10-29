@@ -8,6 +8,7 @@ import CRUD from './CRUD';
 import CompanyService from './CompanyService';
 import BoardService from './BoardService';
 import BoardColumnService from './BoardColumnService';
+import { ErrorHandler } from '../../helpers/ErrorHandler';
 
 @Service()
 export default class JobService extends CRUD<Job> {
@@ -38,8 +39,19 @@ export default class JobService extends CRUD<Job> {
     );
   }
 
-  private async alignSortOrder(): Promise<void> {
-    const jobs: Job[] = await super.find({ order: { sortOrder: 'ASC' } });
+  // Reset the sortOrder of the jobs in the same board and column
+  // to the default values of (index+1)*1000
+  private async alignSortOrder(
+    board: string,
+    boardColumn: string
+  ): Promise<void> {
+    const jobs: Job[] = await super.find({
+      where: {
+        board: { $eq: new mongoObjectID(board) as ObjectID },
+        boardColumn: { $eq: new mongoObjectID(boardColumn) as ObjectID },
+      },
+      order: { sortOrder: 'ASC' },
+    });
     for (let i = 0; i < jobs.length; i++) {
       const defaultSortOrder = (i + 1) * 1000;
       if (jobs[i].sortOrder !== defaultSortOrder) {
@@ -155,7 +167,13 @@ export default class JobService extends CRUD<Job> {
     return updatedJob;
   }
 
-  async move(id: string, boardColumn: string, prevJobId?: string) {
+  async move(
+    id: string,
+    board: string,
+    boardColumn: string,
+    prevJobId?: string,
+    retry?: boolean
+  ) {
     const jobId = new mongoObjectID(id) as ObjectID;
     const prevJob = prevJobId && (await super.findOne(prevJobId));
     const minSortOrder = (prevJob && prevJob.sortOrder) || 0;
@@ -176,8 +194,12 @@ export default class JobService extends CRUD<Job> {
     const newSortOrder = Math.floor((minSortOrder + maxSortOrder) / 2);
     // Can no longer divide sort order in half - need to reset sortOrder to current index * 1000
     if (newSortOrder === minSortOrder || newSortOrder === maxSortOrder) {
-      await this.alignSortOrder();
-      return await this.move(id, boardColumn, prevJobId);
+      // Already tried to align sort order but failed - critical error
+      if (retry) {
+        throw new ErrorHandler(500, 'Sort order alignment failed');
+      }
+      await this.alignSortOrder(board, boardColumn);
+      return await this.move(id, board, boardColumn, prevJobId, true);
     } else {
       return await this.update(id, {
         sortOrder: newSortOrder,

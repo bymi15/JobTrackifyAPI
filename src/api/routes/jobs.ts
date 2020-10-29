@@ -200,6 +200,7 @@ route.patch(
       }
       const updatedJob = await jobServiceInstance.move(
         req.params.id,
+        (job.board as ObjectID).toHexString(),
         req.body.boardColumn,
         req.body.prevJobId
       );
