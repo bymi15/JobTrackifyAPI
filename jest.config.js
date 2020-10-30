@@ -13,8 +13,12 @@ module.exports = {
 
   // The glob patterns Jest uses to detect test files
   testMatch: [
-    // '**/?(*.)+(spec|test).js?(x)',
     '**/?(*.)+(spec|test).ts?(x)',
+    // '**/e2e/routes/?(*.)+(spec|test).ts?(x)',
+    // '**/integration/?(*.)+(spec|test).ts?(x)',
+    // '**/unit/**/?(*.)+(spec|test).ts?(x)',
+    // '**/integration/BoardService.+(spec|test).ts?(x)',
+    // '**/e2e/routes/boardColumns.+(spec|test).ts?(x)',
   ],
 
   // A map from regular expressions to paths to transformers

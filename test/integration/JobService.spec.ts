@@ -249,7 +249,8 @@ describe('JobService', () => {
       //move 3 to 1
       const response = await jobServiceInstance.move(
         mockJob3.id.toHexString(),
-        (mockJob3.boardColumn as ObjectID).toHexString()
+        (mockBoardA.id as ObjectID).toHexString(),
+        (mockBoardColumnA.id as ObjectID).toHexString()
       );
       expect(response).toBeDefined();
       expect(response.sortOrder).toEqual(500);
@@ -277,6 +278,7 @@ describe('JobService', () => {
       //move 1 to 3
       const response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString(),
         mockJob3.id.toHexString()
       );
@@ -309,6 +311,7 @@ describe('JobService', () => {
       //move 1 to 3
       const response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString(),
         mockJob3.id.toHexString()
       );
@@ -342,6 +345,7 @@ describe('JobService', () => {
       //move 3 to 1
       const response = await jobServiceInstance.move(
         mockJob3.id.toHexString(),
+        (mockJob3.board as ObjectID).toHexString(),
         (mockJob3.boardColumn as ObjectID).toHexString()
       );
       expect(response).toBeDefined();
@@ -374,6 +378,7 @@ describe('JobService', () => {
       //move 4 to 2
       const response = await jobServiceInstance.move(
         mockJob4.id.toHexString(),
+        (mockJob4.board as ObjectID).toHexString(),
         (mockJob4.boardColumn as ObjectID).toHexString(),
         mockJob1.id.toHexString()
       );
@@ -407,6 +412,7 @@ describe('JobService', () => {
       //move 2 to 4
       const response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         (mockJob2.boardColumn as ObjectID).toHexString(),
         mockJob4.id.toHexString()
       );
@@ -443,6 +449,7 @@ describe('JobService', () => {
       //move 2 to 4
       const response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         (mockJob2.boardColumn as ObjectID).toHexString(),
         mockJob4.id.toHexString()
       );
@@ -473,6 +480,7 @@ describe('JobService', () => {
 
       let response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         (mockJob2.boardColumn as ObjectID).toHexString()
       );
       expect(response).toBeDefined();
@@ -480,6 +488,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString()
       );
       expect(response).toBeDefined();
@@ -487,6 +496,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         (mockJob2.boardColumn as ObjectID).toHexString()
       );
       expect(response).toBeDefined();
@@ -494,6 +504,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString()
       );
       expect(response).toBeDefined();
@@ -501,6 +512,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         (mockJob2.boardColumn as ObjectID).toHexString()
       );
       expect(response).toBeDefined();
@@ -508,6 +520,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString()
       );
       expect(response).toBeDefined();
@@ -515,6 +528,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         (mockJob2.boardColumn as ObjectID).toHexString()
       );
       expect(response).toBeDefined();
@@ -522,6 +536,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString()
       );
       expect(response).toBeDefined();
@@ -529,6 +544,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         (mockJob2.boardColumn as ObjectID).toHexString()
       );
       expect(response).toBeDefined();
@@ -536,6 +552,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString()
       );
       expect(response).toBeDefined();
@@ -567,6 +584,7 @@ describe('JobService', () => {
 
       let response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString(),
         mockJob2.id.toHexString()
       );
@@ -575,6 +593,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         (mockJob2.boardColumn as ObjectID).toHexString(),
         mockJob1.id.toHexString()
       );
@@ -583,6 +602,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString(),
         mockJob2.id.toHexString()
       );
@@ -591,6 +611,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         (mockJob2.boardColumn as ObjectID).toHexString(),
         mockJob1.id.toHexString()
       );
@@ -599,6 +620,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString(),
         mockJob2.id.toHexString()
       );
@@ -607,6 +629,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         (mockJob2.boardColumn as ObjectID).toHexString(),
         mockJob1.id.toHexString()
       );
@@ -615,6 +638,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString(),
         mockJob2.id.toHexString()
       );
@@ -623,6 +647,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         (mockJob2.boardColumn as ObjectID).toHexString(),
         mockJob1.id.toHexString()
       );
@@ -631,6 +656,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString(),
         mockJob2.id.toHexString()
       );
@@ -639,6 +665,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         (mockJob2.boardColumn as ObjectID).toHexString(),
         mockJob1.id.toHexString()
       );
@@ -647,6 +674,7 @@ describe('JobService', () => {
 
       response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         (mockJob1.boardColumn as ObjectID).toHexString(),
         mockJob2.id.toHexString()
       );
@@ -678,6 +706,7 @@ describe('JobService', () => {
       });
       const response = await jobServiceInstance.move(
         mockJob1.id.toHexString(),
+        (mockJob1.board as ObjectID).toHexString(),
         mockBoardColumnB.id.toHexString()
       );
       expect(response).toBeDefined();
@@ -710,6 +739,7 @@ describe('JobService', () => {
       });
       const response = await jobServiceInstance.move(
         mockJob2.id.toHexString(),
+        (mockJob2.board as ObjectID).toHexString(),
         mockBoardColumnB.id.toHexString()
       );
       expect(response).toBeDefined();
@@ -742,6 +772,7 @@ describe('JobService', () => {
       });
       const response = await jobServiceInstance.move(
         mockJob3.id.toHexString(),
+        (mockJob3.board as ObjectID).toHexString(),
         mockBoardColumnB.id.toHexString()
       );
       expect(response).toBeDefined();
@@ -783,6 +814,7 @@ describe('JobService', () => {
       });
       const response = await jobServiceInstance.move(
         mockJobA.id.toHexString(),
+        (mockJobA.board as ObjectID).toHexString(),
         mockBoardColumnB.id.toHexString()
       );
       expect(response).toBeDefined();
@@ -830,6 +862,7 @@ describe('JobService', () => {
       });
       const response = await jobServiceInstance.move(
         mockJobA.id.toHexString(),
+        (mockJobA.board as ObjectID).toHexString(),
         mockBoardColumnB.id.toHexString(),
         mockJob1.id.toHexString()
       );
@@ -878,6 +911,7 @@ describe('JobService', () => {
       });
       const response = await jobServiceInstance.move(
         mockJobB.id.toHexString(),
+        (mockJobB.board as ObjectID).toHexString(),
         mockBoardColumnB.id.toHexString(),
         mockJob3.id.toHexString()
       );
