@@ -1,0 +1,35 @@
+version: 2.1 
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:11.14.0
+      - image: circleci/mongo:4.4.1
+        environment:
+          - MONGODB_TEST_URI: "mongodb://127.0.0.1/jobtrackifyapi"
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - run: 
+          name: Install project dependencies
+          command: npm install
+      - save_cache:
+          key: v1-dependencies-{{ checksum "package.json"}}
+          paths:
+            - node_modules
+      - run: 
+          name: Run eslint
+          command: npm run lint
+      - run:
+          name: Run tests
+          command: npm run test
+      - run:
+          name: Compile
+          command: npm run build
+
+workflows:
+  version: 2.1
+  run_build:
+    jobs:
+      - build
