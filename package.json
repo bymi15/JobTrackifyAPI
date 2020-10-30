@@ -2,9 +2,9 @@
   "name": "jobtrackifyapi",
   "version": "0.3.0",
   "description": "",
-  "main": "build/app.js",
+  "main": "build/src/app.js",
   "scripts": {
-    "start": "node build/app.js",
+    "start": "node build/src/app.js",
     "build": "tsc -p .",
     "dev": "nodemon -V --exec ts-node src/app.ts",
     "dev:test": "cross-env NODE_ENV=test nodemon -V --exec ts-node src/app.ts",
