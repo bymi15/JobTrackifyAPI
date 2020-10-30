@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.1](https://github.com/bymi15/JobTrackifyAPI/compare/v0.3.0...v0.3.1) (2020-10-30)
+
+
+### Features
+
+* **BoardColumn:** add BoardColumn entity schema ([5339959](https://github.com/bymi15/JobTrackifyAPI/commit/5339959ebda2105cbb3b8233ddebff2080e3b793))
+* **BoardColumn:** add service, routes, factory for BoardColumn entity ([46780f6](https://github.com/bymi15/JobTrackifyAPI/commit/46780f656c74caab1f4a46a085f32c94ad2211c8))
+* **CRUD:** add options to find ([7265172](https://github.com/bymi15/JobTrackifyAPI/commit/7265172cfc4b23156a37dbd787c63f095b0d50b6))
+* **database:** add Job factory and seed ([bfce299](https://github.com/bymi15/JobTrackifyAPI/commit/bfce299a16cd43fc6a3d6e87a7745267cbb2f979))
+* **entities:** add Job entity ([1ab48c3](https://github.com/bymi15/JobTrackifyAPI/commit/1ab48c3bc0aa0fd64f4dcb799406ec0457e148d3))
+* **routes:** add jobs route ([532db07](https://github.com/bymi15/JobTrackifyAPI/commit/532db07126bb957262637a5e339a2fcfb1eb5f9c))
+* **services:** add Job service ([adb8046](https://github.com/bymi15/JobTrackifyAPI/commit/adb8046827f79a0fed84c6a9640e887b059b92fe))
+
+
+### Bug Fixes
+
+* **BoardService:** add default ordering by most recent date created ([36b6461](https://github.com/bymi15/JobTrackifyAPI/commit/36b6461ff67c3b3bb138d118bba8cd0dc6e0a72a))
+* **CompanyEntity:** set foundedYear as an optional field ([1cb50c3](https://github.com/bymi15/JobTrackifyAPI/commit/1cb50c362b0469423d93794f5bc550f9645dc438))
+* **CompanyService:** add default alphabetical ordering by name ([75eab8d](https://github.com/bymi15/JobTrackifyAPI/commit/75eab8d387b379f1030797a8e1085e57d9174c35))
+* **CRUD:** fix update function ([240de04](https://github.com/bymi15/JobTrackifyAPI/commit/240de04f1a913daa46827a2009dd9c0bf13b22ce))
+* **entities:** add IsOptional class validator checks ([00bb063](https://github.com/bymi15/JobTrackifyAPI/commit/00bb0633ca46ae2572e7df7ba3665f9886d7fe08))
+* **Job:** remove unnecessary index field from Job entity ([5c47d43](https://github.com/bymi15/JobTrackifyAPI/commit/5c47d432c83aa720ecac86aeede9b65a47ebd360))
+* **JobEntity:** remove buggy index ([8fa5726](https://github.com/bymi15/JobTrackifyAPI/commit/8fa57268e36b2b0347431dc32619d9dcccbb4124))
+* **JobFactory:** add missing parenthesis ([a7b045c](https://github.com/bymi15/JobTrackifyAPI/commit/a7b045c35d20a909a66d2aaec89d3eea43a677f4))
+* **JobService:** fix alignSortOrder to align within the board and column ([e68cc87](https://github.com/bymi15/JobTrackifyAPI/commit/e68cc87065292f0bc7dd266bb348336ad2c7d21b))
+* **jobsRoute:** add missing attachUser middleware ([10e5594](https://github.com/bymi15/JobTrackifyAPI/commit/10e5594d7cdcbd160e540559964e9d2bbc16d010))
+* **jobsRoute:** add owner check ([b786318](https://github.com/bymi15/JobTrackifyAPI/commit/b7863189cfecd05a8c8e3808691c2397d718f848))
+* **jobsRoute:** fix create job route ([4095552](https://github.com/bymi15/JobTrackifyAPI/commit/4095552c48e54b51f9423e8d3c610e0a0511d025))
+* **routes:** update jobs route ([dd0542b](https://github.com/bymi15/JobTrackifyAPI/commit/dd0542bf50c313fd5f4e1c762621618956a6f48d))
+* **seeds:** update seeds ([81428be](https://github.com/bymi15/JobTrackifyAPI/commit/81428be7e024364a5e8d91845af7c93f68cea175))
+* **services:** bug fixes ([80d100d](https://github.com/bymi15/JobTrackifyAPI/commit/80d100da6097eb55c981eefa560be5c8f122f719))
+
 ## [0.3.0](https://github.com/bymi15/JobTrackifyAPI/compare/v0.2.2...v0.3.0) (2020-10-16)
 
 
