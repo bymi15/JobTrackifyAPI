@@ -19,9 +19,6 @@ jobs:
           paths:
             - node_modules
       - run: 
-          name: Run mongodb test
-          command: npm run mongodb
-      - run: 
           name: Run eslint
           command: npm run lint
       - run:
