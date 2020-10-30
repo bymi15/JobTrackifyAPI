@@ -5,9 +5,10 @@ jobs:
     docker:
       - image: circleci/node:11.14.0
       - image: circleci/mongo:4.4.1
+        environment:
+          - MONGODB_TEST_URI: "mongodb://127.0.0.1/jobtrackifyapi"
     steps:
       - checkout
-      - setup_remote_docker
       - restore_cache:
           key: v1-dependencies-{{ checksum "package.json" }}
       - run: 
