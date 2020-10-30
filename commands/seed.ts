@@ -76,7 +76,7 @@ const run = async () => {
               board.id,
               boardColumn.id,
               user.id
-            ).seedOne({ index: i + 1, sortOrder: (i + 1) * 1000 })
+            ).seedOne({ sortOrder: (i + 1) * 1000 })
           );
         }
         log(`${jobs.length} jobs created!`);
