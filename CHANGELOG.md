@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.4.0](https://github.com/bymi15/JobTrackifyAPI/compare/v0.3.1...v0.4.0) (2020-11-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Company:** restructure Company entity and add more fields
+
+### Features
+
+* **Company:** restructure Company entity ([c2eb72c](https://github.com/bymi15/JobTrackifyAPI/commit/c2eb72c81bf898d143924d8d2233259bb0511821))
+
 ### [0.3.1](https://github.com/bymi15/JobTrackifyAPI/compare/v0.3.0...v0.3.1) (2020-10-30)
 
 
