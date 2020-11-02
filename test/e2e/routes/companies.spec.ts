@@ -225,28 +225,28 @@ describe('CompaniesRoute', () => {
   describe('POST /companies', () => {
     it('should successfully create a company for admin user', async () => {
       const mockCompany = CompanyFactory();
-      const mockBody = {
-        name: mockCompany.name,
-        description: mockCompany.description,
-        logo: mockCompany.logo,
-        website: mockCompany.website,
-        headquarters: mockCompany.headquarters,
-        industry: mockCompany.industry,
-        foundedYear: mockCompany.foundedYear,
-      };
+      Reflect.deleteProperty(mockCompany, 'createdAt');
       let res = await request
         .post(baseUrl)
-        .send(mockBody)
+        .send(mockCompany)
         .set({ Authorization: adminUserToken });
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty('id');
-      expect(res.body.name).toEqual(mockBody.name);
-      expect(res.body.description).toEqual(mockBody.description);
-      expect(res.body.logo).toEqual(mockBody.logo);
-      expect(res.body.website).toEqual(mockBody.website);
-      expect(res.body.headquarters).toEqual(mockBody.headquarters);
-      expect(res.body.industry).toEqual(mockBody.industry);
-      expect(res.body.foundedYear).toEqual(mockBody.foundedYear);
+      expect(res.body.name).toEqual(mockCompany.name);
+      expect(res.body.description).toEqual(mockCompany.description);
+      expect(res.body.logo).toEqual(mockCompany.logo);
+      expect(res.body.website).toEqual(mockCompany.website);
+      expect(res.body.location).toEqual(mockCompany.location);
+      expect(res.body.industry).toEqual(mockCompany.industry);
+      expect(res.body.foundedYear).toEqual(mockCompany.foundedYear);
+      expect(res.body.linkedInUrl).toEqual(mockCompany.linkedInUrl);
+      expect(res.body.sizeRange).toEqual(mockCompany.sizeRange);
+      expect(res.body.currentEmployeeEstimate).toEqual(
+        mockCompany.currentEmployeeEstimate
+      );
+      expect(res.body.totalEmployeeEstimate).toEqual(
+        mockCompany.totalEmployeeEstimate
+      );
       const companyId: string = res.body.id;
       res = await request
         .get(`${baseUrl}/${companyId}`)
@@ -256,28 +256,28 @@ describe('CompaniesRoute', () => {
     });
     it('should successfully create a company for staff user', async () => {
       const mockCompany = CompanyFactory();
-      const mockBody = {
-        name: mockCompany.name,
-        description: mockCompany.description,
-        logo: mockCompany.logo,
-        website: mockCompany.website,
-        headquarters: mockCompany.headquarters,
-        industry: mockCompany.industry,
-        foundedYear: mockCompany.foundedYear,
-      };
+      Reflect.deleteProperty(mockCompany, 'createdAt');
       let res = await request
         .post(baseUrl)
-        .send(mockBody)
+        .send(mockCompany)
         .set({ Authorization: staffUserToken });
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty('id');
-      expect(res.body.name).toEqual(mockBody.name);
-      expect(res.body.description).toEqual(mockBody.description);
-      expect(res.body.logo).toEqual(mockBody.logo);
-      expect(res.body.website).toEqual(mockBody.website);
-      expect(res.body.headquarters).toEqual(mockBody.headquarters);
-      expect(res.body.industry).toEqual(mockBody.industry);
-      expect(res.body.foundedYear).toEqual(mockBody.foundedYear);
+      expect(res.body.name).toEqual(mockCompany.name);
+      expect(res.body.description).toEqual(mockCompany.description);
+      expect(res.body.logo).toEqual(mockCompany.logo);
+      expect(res.body.website).toEqual(mockCompany.website);
+      expect(res.body.location).toEqual(mockCompany.location);
+      expect(res.body.industry).toEqual(mockCompany.industry);
+      expect(res.body.foundedYear).toEqual(mockCompany.foundedYear);
+      expect(res.body.linkedInUrl).toEqual(mockCompany.linkedInUrl);
+      expect(res.body.sizeRange).toEqual(mockCompany.sizeRange);
+      expect(res.body.currentEmployeeEstimate).toEqual(
+        mockCompany.currentEmployeeEstimate
+      );
+      expect(res.body.totalEmployeeEstimate).toEqual(
+        mockCompany.totalEmployeeEstimate
+      );
       const companyId: string = res.body.id;
       res = await request
         .get(`${baseUrl}/${companyId}`)
@@ -287,33 +287,17 @@ describe('CompaniesRoute', () => {
     });
     it('should return a forbidden error for normal user', async () => {
       const mockCompany = CompanyFactory();
-      const mockBody = {
-        name: mockCompany.name,
-        description: mockCompany.description,
-        logo: mockCompany.logo,
-        website: mockCompany.website,
-        headquarters: mockCompany.headquarters,
-        industry: mockCompany.industry,
-        foundedYear: mockCompany.foundedYear,
-      };
+      Reflect.deleteProperty(mockCompany, 'createdAt');
       const res = await request
         .post(baseUrl)
-        .send(mockBody)
+        .send(mockCompany)
         .set({ Authorization: normalUserToken });
       expect(res.statusCode).toEqual(403);
     });
     it('should return an unauthorized error without an auth token', async () => {
       const mockCompany = CompanyFactory();
-      const mockBody = {
-        name: mockCompany.name,
-        description: mockCompany.description,
-        logo: mockCompany.logo,
-        website: mockCompany.website,
-        headquarters: mockCompany.headquarters,
-        industry: mockCompany.industry,
-        foundedYear: mockCompany.foundedYear,
-      };
-      const res = await request.post(baseUrl).send(mockBody);
+      Reflect.deleteProperty(mockCompany, 'createdAt');
+      const res = await request.post(baseUrl).send(mockCompany);
       expect(res.statusCode).toEqual(401);
       expect(res.body).toHaveProperty('error');
     });
@@ -323,9 +307,6 @@ describe('CompaniesRoute', () => {
         name: '',
         description: mockCompany.description,
         logo: mockCompany.logo,
-        website: mockCompany.website,
-        headquarters: mockCompany.headquarters,
-        industry: mockCompany.industry,
         foundedYear: mockCompany.foundedYear,
       };
       let res = await request
@@ -341,15 +322,10 @@ describe('CompaniesRoute', () => {
       expect(res.statusCode).toEqual(400);
       expect(res.body).toHaveProperty('error');
     });
-    it('should return validation error if foundedYear is not a number string', async () => {
+    it('should return validation error if foundedYear is not a number', async () => {
       const mockCompany = CompanyFactory();
       const mockBody = {
         name: mockCompany.name,
-        description: mockCompany.description,
-        logo: mockCompany.logo,
-        website: mockCompany.website,
-        headquarters: mockCompany.headquarters,
-        industry: mockCompany.industry,
         foundedYear: 'mockInvalidFoundedYear',
       };
       const res = await request
@@ -363,12 +339,7 @@ describe('CompaniesRoute', () => {
       const mockCompany = CompanyFactory();
       const mockBody = {
         name: mockCompany.name,
-        description: mockCompany.description,
         logo: 'mockInvalidLogo',
-        website: mockCompany.website,
-        headquarters: mockCompany.headquarters,
-        industry: mockCompany.industry,
-        foundedYear: mockCompany.foundedYear,
       };
       const res = await request
         .post(baseUrl)
@@ -381,12 +352,46 @@ describe('CompaniesRoute', () => {
       const mockCompany = CompanyFactory();
       const mockBody = {
         name: mockCompany.name,
-        description: mockCompany.description,
-        logo: mockCompany.logo,
         website: 'mockInvalidWebsite',
-        headquarters: mockCompany.headquarters,
-        industry: mockCompany.industry,
-        foundedYear: mockCompany.foundedYear,
+      };
+      const res = await request
+        .post(baseUrl)
+        .send(mockBody)
+        .set({ Authorization: staffUserToken });
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toHaveProperty('error');
+    });
+    it('should return validation error if totalEmployeeEstimate is not a number', async () => {
+      const mockCompany = CompanyFactory();
+      const mockBody = {
+        name: mockCompany.name,
+        totalEmployeeEstimate: 'notANumber',
+      };
+      const res = await request
+        .post(baseUrl)
+        .send(mockBody)
+        .set({ Authorization: staffUserToken });
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toHaveProperty('error');
+    });
+    it('should return validation error if currentEmployeeEstimate is not a number', async () => {
+      const mockCompany = CompanyFactory();
+      const mockBody = {
+        name: mockCompany.name,
+        currentEmployeeEstimate: 'notANumber',
+      };
+      const res = await request
+        .post(baseUrl)
+        .send(mockBody)
+        .set({ Authorization: staffUserToken });
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toHaveProperty('error');
+    });
+    it('should return validation error if linkedInUrl is not a valid url', async () => {
+      const mockCompany = CompanyFactory();
+      const mockBody = {
+        name: mockCompany.name,
+        linkedInUrl: 'mockInvalidUrl',
       };
       const res = await request
         .post(baseUrl)
@@ -421,7 +426,7 @@ describe('CompaniesRoute', () => {
       expect(res.body.description).toEqual(mockBody.description);
       expect(res.body.logo).toEqual(mockCompany.logo);
       expect(res.body.website).toEqual(mockCompany.website);
-      expect(res.body.headquarters).toEqual(mockCompany.headquarters);
+      expect(res.body.location).toEqual(mockCompany.location);
       expect(res.body.industry).toEqual(mockCompany.industry);
       expect(res.body.foundedYear).toEqual(mockCompany.foundedYear);
     });
@@ -448,7 +453,7 @@ describe('CompaniesRoute', () => {
       expect(res.body.description).toEqual(mockBody.description);
       expect(res.body.logo).toEqual(mockCompany.logo);
       expect(res.body.website).toEqual(mockCompany.website);
-      expect(res.body.headquarters).toEqual(mockCompany.headquarters);
+      expect(res.body.location).toEqual(mockCompany.location);
       expect(res.body.industry).toEqual(mockCompany.industry);
       expect(res.body.foundedYear).toEqual(mockCompany.foundedYear);
     });
@@ -484,7 +489,7 @@ describe('CompaniesRoute', () => {
       expect(res.statusCode).toEqual(401);
       expect(res.body).toHaveProperty('error');
     });
-    it('should return validation error if foundedYear is not a number string', async () => {
+    it('should return validation error if foundedYear is not a number', async () => {
       const mockCompany = await companySeed.seedOne();
       const mockCompanyId = mockCompany.id.toHexString();
       const mockBody = { foundedYear: 'mockInvalidFoundedYear' };

@@ -87,11 +87,11 @@ describe('CRUD', () => {
     test('Should find all the entities querying by field', async () => {
       await entitySeed.seedMany(2);
       const mockCompanies = await entitySeed.seedMany(3, {
-        headquarters: { city: 'mockCity', country: 'mockCountry' },
+        location: { locality: 'mockLocality', country: 'mockCountry' },
       });
       const response = await crudInstance.find({
         where: {
-          'headquarters.city': { $eq: 'mockCity' },
+          'location.country': { $eq: 'mockCountry' },
         },
       });
       expect(response.length).toEqual(3);
