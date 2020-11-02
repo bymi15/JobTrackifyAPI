@@ -1,5 +1,5 @@
 import { Entity, ObjectIdColumn, Column, Index, ObjectID } from 'typeorm';
-import { IsUrl, IsString, IsNumberString, IsOptional } from 'class-validator';
+import { IsUrl, IsString, IsNumber, IsOptional } from 'class-validator';
 
 @Entity()
 export class Company {
@@ -27,8 +27,28 @@ export class Company {
 
   @Column()
   @IsOptional()
-  headquarters?: {
-    city?: string;
+  @IsUrl()
+  linkedInUrl?: string;
+
+  @Column()
+  @IsOptional()
+  @IsString()
+  sizeRange?: string;
+
+  @Column()
+  @IsOptional()
+  @IsNumber()
+  currentEmployeeEstimate?: number;
+
+  @Column()
+  @IsOptional()
+  @IsNumber()
+  totalEmployeeEstimate?: number;
+
+  @Column()
+  @IsOptional()
+  location?: {
+    locality?: string;
     country?: string;
   };
 
@@ -39,8 +59,8 @@ export class Company {
 
   @Column()
   @IsOptional()
-  @IsNumberString()
-  foundedYear?: string;
+  @IsNumber()
+  foundedYear?: number;
 
   @Column()
   createdAt?: string = new Date().toISOString();
@@ -51,7 +71,11 @@ export class Company {
       this.description = data.description;
       this.logo = data.logo;
       this.website = data.website;
-      this.headquarters = data.headquarters;
+      this.linkedInUrl = data.linkedInUrl;
+      this.location = data.location;
+      this.sizeRange = data.sizeRange;
+      this.totalEmployeeEstimate = data.totalEmployeeEstimate;
+      this.currentEmployeeEstimate = data.currentEmployeeEstimate;
       this.industry = data.industry;
       this.foundedYear = data.foundedYear;
     }

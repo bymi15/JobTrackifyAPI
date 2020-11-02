@@ -59,12 +59,16 @@ route.post(
       description: Joi.string(),
       logo: Joi.string(),
       website: Joi.string(),
-      headquarters: Joi.object({
-        city: Joi.string(),
+      location: Joi.object({
+        locality: Joi.string(),
         country: Joi.string(),
       }),
       industry: Joi.string(),
-      foundedYear: Joi.string(),
+      foundedYear: Joi.number(),
+      linkedInUrl: Joi.string(),
+      sizeRange: Joi.string(),
+      currentEmployeeEstimate: Joi.number(),
+      totalEmployeeEstimate: Joi.number(),
     }),
   }),
   async (req, res, next) => {
@@ -92,12 +96,16 @@ route.patch(
       description: Joi.string(),
       logo: Joi.string(),
       website: Joi.string(),
-      headquarters: Joi.object({
-        city: Joi.string().required(),
-        country: Joi.string().required(),
+      location: Joi.object({
+        locality: Joi.string(),
+        country: Joi.string(),
       }),
       industry: Joi.string(),
-      foundedYear: Joi.string(),
+      foundedYear: Joi.number(),
+      linkedInUrl: Joi.string(),
+      sizeRange: Joi.string(),
+      currentEmployeeEstimate: Joi.number(),
+      totalEmployeeEstimate: Joi.number(),
     }),
   }),
   async (req, res, next) => {
