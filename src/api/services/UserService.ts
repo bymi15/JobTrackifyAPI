@@ -10,6 +10,7 @@ import { IUserInputDTO, IUserResponseDTO } from '../../types';
 import { validate } from 'class-validator';
 import CRUD from './CRUD';
 import { ErrorHandler } from '../../helpers/ErrorHandler';
+import { has } from 'lodash';
 
 @Service()
 export default class UserService extends CRUD<User> {
@@ -107,5 +108,30 @@ export default class UserService extends CRUD<User> {
       Reflect.deleteProperty(user, 'password');
     }
     return user;
+  }
+
+  async changePassword(
+    user: User,
+    data: {
+      currentPassword: string;
+      password: string;
+    }
+  ): Promise<User> {
+    const userRecord = await this.userRepo.findOne({ email: user.email });
+    if (!userRecord) throw new ErrorHandler(500, 'Invalid user');
+    const validPassword = await bcrypt.compare(
+      data.currentPassword,
+      userRecord.password
+    );
+    if (validPassword) {
+      const hashedPassword = await bcrypt.hash(data.password, 12);
+      user.password = hashedPassword;
+      if (has(user, 'updatedAt')) {
+        user['updatedAt'] = new Date().toISOString();
+      }
+      return await this.repo.save(user);
+    } else {
+      throw new ErrorHandler(400, 'Invalid password');
+    }
   }
 }
