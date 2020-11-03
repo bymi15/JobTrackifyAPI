@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.1](https://github.com/bymi15/JobTrackifyAPI/compare/v0.4.0...v0.4.1) (2020-11-03)
+
+
+### Features
+
+* **UserService:** add change password and update password features ([d2f2f29](https://github.com/bymi15/JobTrackifyAPI/commit/d2f2f29b318d769c2d1b08295d5ac31914d123fb))
+
 ## [0.4.0](https://github.com/bymi15/JobTrackifyAPI/compare/v0.3.1...v0.4.0) (2020-11-02)
 
 
