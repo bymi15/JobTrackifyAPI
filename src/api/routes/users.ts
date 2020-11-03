@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { Logger } from 'winston';
 import { Container } from 'typedi';
-import { isAuth, checkRole } from '../middlewares';
+import { isAuth, checkRole, attachUser } from '../middlewares';
 import UserService from '../services/UserService';
+import { celebrate, Joi } from 'celebrate';
 
 const route = Router();
 
@@ -34,6 +35,88 @@ route.get(
       const userServiceInstance = Container.get(UserService);
       const user = await userServiceInstance.findOne(req.params.id);
       return res.json(user).status(200);
+    } catch (e) {
+      return next(e);
+    }
+  }
+);
+
+route.delete('/:id', isAuth, attachUser, async (req, res, next) => {
+  const logger: Logger = Container.get('logger');
+  logger.debug(
+    'Calling DELETE to /users/:id endpoint with id: %s',
+    req.params.id
+  );
+  try {
+    const userServiceInstance = Container.get(UserService);
+    if (
+      req.currentUser.role !== 'admin' &&
+      req.params.id !== req.currentUser.id.toHexString()
+    ) {
+      return res.sendStatus(403);
+    }
+    await userServiceInstance.delete(req.currentUser.id.toHexString());
+    return res.status(204).end();
+  } catch (e) {
+    return next(e);
+  }
+});
+
+route.put(
+  '/changePassword',
+  isAuth,
+  attachUser,
+  celebrate({
+    body: Joi.object({
+      currentPassword: Joi.string(),
+      password: Joi.string(),
+    }),
+  }),
+  async (req, res, next) => {
+    const logger: Logger = Container.get('logger');
+    logger.debug('Calling PUT to /changePassword endpoint', req.body);
+    try {
+      const userServiceInstance = Container.get(UserService);
+      const user = await userServiceInstance.changePassword(
+        req.currentUser,
+        req.body
+      );
+      return res.status(200).json(user);
+    } catch (e) {
+      return next(e);
+    }
+  }
+);
+
+route.patch(
+  '/:id',
+  isAuth,
+  attachUser,
+  celebrate({
+    body: Joi.object({
+      firstName: Joi.string(),
+      lastName: Joi.string(),
+    }),
+  }),
+  async (req, res, next) => {
+    const logger: Logger = Container.get('logger');
+    logger.debug(
+      'Calling PATCH to /boards/:id endpoint with body: %o',
+      req.body
+    );
+    try {
+      const userServiceInstance = Container.get(UserService);
+      if (
+        req.currentUser.role !== 'admin' &&
+        req.params.id !== req.currentUser.id.toHexString()
+      ) {
+        return res.sendStatus(403);
+      }
+      const updatedUser = await userServiceInstance.update(
+        req.currentUser.id.toHexString(),
+        req.body
+      );
+      return res.status(200).json(updatedUser);
     } catch (e) {
       return next(e);
     }
