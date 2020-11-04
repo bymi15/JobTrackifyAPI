@@ -41,7 +41,7 @@ route.get(
   }
 );
 
-route.delete('/:id', isAuth, attachUser, async (req, res, next) => {
+route.delete('/:id', isAuth, checkRole('admin'), async (req, res, next) => {
   const logger: Logger = Container.get('logger');
   logger.debug(
     'Calling DELETE to /users/:id endpoint with id: %s',
@@ -49,44 +49,12 @@ route.delete('/:id', isAuth, attachUser, async (req, res, next) => {
   );
   try {
     const userServiceInstance = Container.get(UserService);
-    if (
-      req.currentUser.role !== 'admin' &&
-      req.params.id !== req.currentUser.id.toHexString()
-    ) {
-      return res.sendStatus(403);
-    }
-    await userServiceInstance.delete(req.currentUser.id.toHexString());
+    await userServiceInstance.delete(req.params.id);
     return res.status(204).end();
   } catch (e) {
     return next(e);
   }
 });
-
-route.put(
-  '/changePassword',
-  isAuth,
-  attachUser,
-  celebrate({
-    body: Joi.object({
-      currentPassword: Joi.string(),
-      password: Joi.string(),
-    }),
-  }),
-  async (req, res, next) => {
-    const logger: Logger = Container.get('logger');
-    logger.debug('Calling PUT to /changePassword endpoint', req.body);
-    try {
-      const userServiceInstance = Container.get(UserService);
-      const user = await userServiceInstance.changePassword(
-        req.currentUser,
-        req.body
-      );
-      return res.status(200).json(user);
-    } catch (e) {
-      return next(e);
-    }
-  }
-);
 
 route.patch(
   '/:id',
@@ -101,7 +69,7 @@ route.patch(
   async (req, res, next) => {
     const logger: Logger = Container.get('logger');
     logger.debug(
-      'Calling PATCH to /boards/:id endpoint with body: %o',
+      'Calling PATCH to /users/:id endpoint with body: %o',
       req.body
     );
     try {

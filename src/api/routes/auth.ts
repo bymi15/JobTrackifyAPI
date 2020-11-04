@@ -66,4 +66,70 @@ route.get('/logout', isAuth, (_req, res) => {
   return res.status(204).end();
 });
 
+route.put(
+  '/changePassword',
+  isAuth,
+  attachUser,
+  celebrate({
+    body: Joi.object({
+      currentPassword: Joi.string(),
+      password: Joi.string(),
+    }),
+  }),
+  async (req, res, next) => {
+    const logger: Logger = Container.get('logger');
+    logger.debug('Calling PUT to /auth/changePassword endpoint', req.body);
+    try {
+      const userServiceInstance = Container.get(UserService);
+      const user = await userServiceInstance.changePassword(
+        req.currentUser,
+        req.body
+      );
+      return res.status(200).json(user);
+    } catch (e) {
+      return next(e);
+    }
+  }
+);
+
+route.delete('/deleteAccount', isAuth, attachUser, async (req, res, next) => {
+  const logger: Logger = Container.get('logger');
+  logger.debug('Calling DELETE to /auth/deleteAccount endpoint');
+  try {
+    const userServiceInstance = Container.get(UserService);
+    await userServiceInstance.delete(req.currentUser.id.toHexString());
+    return res.status(204).end();
+  } catch (e) {
+    return next(e);
+  }
+});
+
+route.patch(
+  '/profile',
+  isAuth,
+  attachUser,
+  celebrate({
+    body: Joi.object({
+      firstName: Joi.string(),
+      lastName: Joi.string(),
+    }),
+  }),
+  async (req, res, next) => {
+    const logger: Logger = Container.get('logger');
+    logger.debug(
+      'Calling PATCH to /auth/profile endpoint with body: %o',
+      req.body
+    );
+    try {
+      const userServiceInstance = Container.get(UserService);
+      const updatedUser = await userServiceInstance.update(
+        req.currentUser.id.toHexString(),
+        req.body
+      );
+      return res.status(200).json(updatedUser);
+    } catch (e) {
+      return next(e);
+    }
+  }
+);
 export default route;
