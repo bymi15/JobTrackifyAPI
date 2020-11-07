@@ -12,9 +12,17 @@ export default (data?: Job): Job => {
     title: (data && data.title) || faker.name.jobTitle(),
     description: (data && data.description) || faker.name.jobDescriptor(),
     postUrl: (data && data.postUrl) || faker.internet.url(),
-    location:
-      (data && data.location) ||
-      `${faker.address.city()}, ${faker.address.country()}`,
+    location: (data && data.location) || {
+      address: `${faker.address.city()}, ${faker.address.country()}`,
+      lat: faker.random.number({
+        min: -90,
+        max: 90,
+      }),
+      lng: faker.random.number({
+        min: -90,
+        max: 90,
+      }),
+    },
     sortOrder: (data && data.sortOrder) || faker.random.number(),
     dateApplied: (data && data.dateApplied) || faker.date.past().toUTCString(),
     owner: (data && data.owner) || (new mongoObjectID() as ObjectID),

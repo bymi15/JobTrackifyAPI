@@ -111,7 +111,9 @@ route.post(
       title: Joi.string().required(),
       description: Joi.string(),
       postUrl: Joi.string(),
-      location: Joi.string(),
+      location: Joi.object({
+        address: Joi.string(),
+      }),
       dateApplied: Joi.string(),
     }),
   }),
@@ -144,7 +146,9 @@ route.patch(
       title: Joi.string(),
       description: Joi.string(),
       postUrl: Joi.string(),
-      location: Joi.string(),
+      location: Joi.object({
+        address: Joi.string(),
+      }),
       dateApplied: Joi.string(),
     }),
   }),
