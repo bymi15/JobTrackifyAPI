@@ -5,7 +5,6 @@ import companies from './companies';
 import boards from './boards';
 import boardColumns from './boardColumns';
 import jobs from './jobs';
-import geocode from './geocode';
 
 const routes = Router();
 
@@ -15,6 +14,5 @@ routes.use('/companies', companies);
 routes.use('/boards', boards);
 routes.use('/boardColumns', boardColumns);
 routes.use('/jobs', jobs);
-routes.use('/geocode', geocode);
 
 export default routes;

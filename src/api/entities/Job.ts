@@ -38,9 +38,11 @@ export class Job {
   postUrl?: string;
 
   @Column()
-  @IsOptional()
-  @IsString()
-  location?: string;
+  location?: {
+    address: string;
+    lat: number;
+    lng: number;
+  };
 
   @Column()
   @IsNumber()

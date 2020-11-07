@@ -9,6 +9,16 @@ import CompanyService from './CompanyService';
 import BoardService from './BoardService';
 import BoardColumnService from './BoardColumnService';
 import { ErrorHandler } from '../../helpers/ErrorHandler';
+import _ from 'lodash';
+import NodeGeocoder, { GoogleOptions } from 'node-geocoder';
+import config from '../../config';
+
+const options: GoogleOptions = {
+  provider: 'google',
+  apiKey: config.googleApiKey,
+};
+
+const geocoder = NodeGeocoder(options);
 
 @Service()
 export default class JobService extends CRUD<Job> {
@@ -160,6 +170,23 @@ export default class JobService extends CRUD<Job> {
   }
 
   async update(id: string, updatedFields: ObjectLiteral): Promise<Job> {
+    if (_.has(updatedFields, 'location')) {
+      if (
+        updatedFields.location.address &&
+        updatedFields.location.address.trim()
+      ) {
+        let geocodeData = await geocoder.geocode(
+          updatedFields.location.address
+        );
+        if (!geocodeData || geocodeData.length === 0) {
+          geocodeData = [{ latitude: 0, longitude: 0 }];
+        }
+        updatedFields.location.lat = geocodeData[0].latitude;
+        updatedFields.location.lng = geocodeData[0].longitude;
+      } else {
+        updatedFields.location = undefined;
+      }
+    }
     const updatedJob = await super.update(id, updatedFields);
     await this.fillCompanyField(updatedJob);
     await this.fillBoardColumnField(updatedJob);
