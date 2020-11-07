@@ -15,6 +15,7 @@ export default {
   port: process.env.PORT || 8000,
   databaseURL: databaseUrl,
   jwtSecret: process.env.JWT_SECRET,
+  googleApiKey: process.env.GOOGLE_API_KEY,
   logs: {
     level: process.env.LOG_LEVEL,
   },
