@@ -26,8 +26,7 @@ export interface IUserResponseDTO {
   token: string;
 }
 
-export interface ICompanyLocationDTO {
-  id: string;
-  companyName: string;
+export interface IJobLocationDTO {
+  jobId: string;
   location: string;
 }

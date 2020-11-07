@@ -5,7 +5,7 @@ import { isAuth } from '../middlewares';
 import { celebrate, Joi } from 'celebrate';
 import NodeGeocoder, { GoogleOptions } from 'node-geocoder';
 import config from '../../config';
-import { ICompanyLocationDTO } from '../../types';
+import { IJobLocationDTO } from '../../types';
 import { ErrorHandler } from '../../helpers/ErrorHandler';
 
 const route = Router();
@@ -37,11 +37,10 @@ route.post(
   isAuth,
   celebrate({
     body: Joi.object({
-      companyLocations: Joi.array()
+      jobLocations: Joi.array()
         .items(
           Joi.object({
-            id: Joi.string().required(),
-            companyName: Joi.string().required(),
+            jobId: Joi.string().required(),
             location: Joi.string().required(),
           })
         )
@@ -52,23 +51,18 @@ route.post(
     const logger: Logger = Container.get('logger');
     logger.debug('Calling POST to /geocode endpoint with body %o', req.body);
     try {
-      const companyLocations = req.body
-        .companyLocations as ICompanyLocationDTO[];
-      logger.debug('%o', companyLocations);
+      const jobLocations = req.body.jobLocations as IJobLocationDTO[];
       const data = [];
-      for (let i = 0; i < companyLocations.length; i++) {
-        const geocodeData = await geocoder.geocode(
-          companyLocations[i].location
-        );
+      for (let i = 0; i < jobLocations.length; i++) {
+        const geocodeData = await geocoder.geocode(jobLocations[i].location);
         if (!geocodeData || geocodeData.length === 0) {
           return next(
             new ErrorHandler(500, 'Geocode API returned invalid response')
           );
         }
         data.push({
-          id: companyLocations[i].id,
-          companyName: companyLocations[i].companyName,
-          address: companyLocations[i].location,
+          jobId: jobLocations[i].jobId,
+          address: jobLocations[i].location,
           lat: geocodeData[0].latitude,
           lng: geocodeData[0].longitude,
         });
