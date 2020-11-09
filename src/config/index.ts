@@ -6,8 +6,11 @@ dotenv.config();
 
 let databaseUrl = process.env.MONGODB_DEV_URI;
 let baseURL = 'http://localhost:3000';
+let testEnv = false;
+
 if (process.env.NODE_ENV === 'test') {
   databaseUrl = process.env.MONGODB_TEST_URI;
+  testEnv = true;
 } else if (process.env.NODE_ENV === 'production') {
   databaseUrl = process.env.MONGODB_URI;
   baseURL = 'https://www.jobtrackify.com';
@@ -15,6 +18,7 @@ if (process.env.NODE_ENV === 'test') {
 
 export default {
   baseURL,
+  testEnv,
   port: process.env.PORT || 8000,
   databaseURL: databaseUrl,
   jwtSecret: process.env.JWT_SECRET,
