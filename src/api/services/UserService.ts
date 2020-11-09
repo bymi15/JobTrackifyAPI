@@ -77,6 +77,7 @@ export default class UserService extends CRUD<User> {
 
   async sendConfirmationEmail(user: User): Promise<void> {
     this.logger.debug(`Sending confirmation email to: ${user.email}`);
+    if (config.testEnv) return;
     const emailToken = await this.generateEmailToken(user.id.toHexString());
     const url = `${config.baseURL}/confirmEmail/${emailToken}`;
     this.transporter.sendMail({

@@ -10,6 +10,7 @@ import BoardSeed from '../../src/database/seeds/BoardSeed';
 import EntitySeed from '../../src/database/seeds/EntitySeed';
 import { User } from '../../src/api/entities/User';
 import { ErrorHandler } from '../../src/helpers/ErrorHandler';
+import nodemailer from 'nodemailer';
 jest.mock('../../src/logger');
 
 describe('BoardService', () => {
@@ -22,6 +23,17 @@ describe('BoardService', () => {
     connection = await databaseLoader();
     await connection.synchronize(true);
     Container.set('logger', Logger);
+    Container.set(
+      'transporter',
+      nodemailer.createTransport({
+        host: 'mockHost',
+        port: 587,
+        auth: {
+          user: 'mockUser',
+          pass: 'mockPass',
+        },
+      })
+    );
     boardServiceInstance = Container.get(BoardService);
   });
 

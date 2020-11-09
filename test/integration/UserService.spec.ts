@@ -9,6 +9,7 @@ import { User } from '../../src/api/entities/User';
 import EntitySeed from '../../src/database/seeds/EntitySeed';
 import UserFactory from '../../src/database/factories/UserFactory';
 import { ErrorHandler } from '../../src/helpers/ErrorHandler';
+import nodemailer from 'nodemailer';
 jest.mock('../../src/logger');
 
 describe('UserService', () => {
@@ -24,6 +25,17 @@ describe('UserService', () => {
       UserFactory
     );
     Container.set('logger', Logger);
+    Container.set(
+      'transporter',
+      nodemailer.createTransport({
+        host: 'mockHost',
+        port: 587,
+        auth: {
+          user: 'mockUser',
+          pass: 'mockPass',
+        },
+      })
+    );
     userServiceInstance = Container.get(UserService);
   });
 
