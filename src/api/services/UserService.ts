@@ -12,6 +12,7 @@ import CRUD from './CRUD';
 import { ErrorHandler } from '../../helpers/ErrorHandler';
 import { has } from 'lodash';
 import { Transporter } from 'nodemailer';
+import VerifyEmailTemplate from '../../helpers/EmailTemplates/VerifyEmailTemplate';
 
 @Service()
 export default class UserService extends CRUD<User> {
@@ -82,7 +83,7 @@ export default class UserService extends CRUD<User> {
       from: 'Job Trackify contact@jobtrackify.com',
       to: user.email,
       subject: 'Welcome to Job Trackify - Confirm your email',
-      html: `<h1>Please click to confirm your email: <a href="${url}">${url}</a></h1>`,
+      html: VerifyEmailTemplate(user, url),
     });
   }
 
