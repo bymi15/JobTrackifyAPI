@@ -11,6 +11,7 @@ import { validate } from 'class-validator';
 import CRUD from './CRUD';
 import { ErrorHandler } from '../../helpers/ErrorHandler';
 import { has } from 'lodash';
+import { Transporter } from 'nodemailer';
 
 @Service()
 export default class UserService extends CRUD<User> {
@@ -18,7 +19,9 @@ export default class UserService extends CRUD<User> {
     @InjectRepository(User)
     protected userRepo: MongoRepository<User>,
     @Inject('logger')
-    protected logger: Logger
+    protected logger: Logger,
+    @Inject('transporter')
+    protected transporter: Transporter
   ) {
     super(userRepo, logger);
   }
@@ -48,9 +51,11 @@ export default class UserService extends CRUD<User> {
     const userRecord: User = await this.userRepo.save(newUser);
     if (!userRecord) throw new ErrorHandler(500, 'User cannot be created');
 
-    const token = await this.generateToken(userRecord);
+    const token = await this.generateAuthToken(userRecord);
     const user = userRecord;
     Reflect.deleteProperty(user, 'password');
+    this.sendConfirmationEmail(user);
+
     return { user, token };
   }
 
@@ -61,7 +66,7 @@ export default class UserService extends CRUD<User> {
 
     const validPassword = await bcrypt.compare(password, userRecord.password);
     if (validPassword) {
-      const token = await this.generateToken(userRecord);
+      const token = await this.generateAuthToken(userRecord);
       const user = userRecord;
       Reflect.deleteProperty(user, 'password');
       return { user, token };
@@ -69,21 +74,48 @@ export default class UserService extends CRUD<User> {
     throw new ErrorHandler(401, 'Invalid email or password');
   }
 
-  private async generateToken(userRecord: User): Promise<string> {
+  async sendConfirmationEmail(user: User): Promise<void> {
+    this.logger.debug(`Sending confirmation email to: ${user.email}`);
+    const emailToken = await this.generateEmailToken(user.id.toHexString());
+    const url = `${config.baseURL}/confirmEmail/${emailToken}`;
+    this.transporter.sendMail({
+      from: 'Job Trackify contact@jobtrackify.com',
+      to: user.email,
+      subject: 'Welcome to Job Trackify - Confirm your email',
+      html: `<h1>Please click to confirm your email: <a href="${url}">${url}</a></h1>`,
+    });
+  }
+
+  private async generateEmailToken(userId: string): Promise<string> {
+    this.logger.debug(`Signing Email JWT for userId: ${userId}`);
+    return new Promise<string>((resolve, reject) => {
+      jwt.sign(
+        {
+          id: userId,
+        },
+        config.emailSecret,
+        { algorithm: 'HS256', expiresIn: '1d' },
+        (err, token) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(token);
+        }
+      );
+    });
+  }
+
+  private async generateAuthToken(userRecord: User): Promise<string> {
     this.logger.debug(`Signing JWT for userId: ${userRecord.id}`);
     return new Promise<string>((resolve, reject) => {
-      const today = new Date();
-      const exp = new Date(today);
-      exp.setDate(today.getDate() + 7);
       jwt.sign(
         {
           id: userRecord.id,
           role: userRecord.role,
           email: userRecord.email,
-          exp: exp.getTime() / 1000,
         },
         config.jwtSecret,
-        { algorithm: 'HS256' },
+        { algorithm: 'HS256', expiresIn: '3d' },
         (err, token) => {
           if (err) {
             return reject(err);
@@ -132,6 +164,17 @@ export default class UserService extends CRUD<User> {
       return await this.repo.save(user);
     } else {
       throw new ErrorHandler(400, 'Invalid password');
+    }
+  }
+
+  async confirmEmail(token: string): Promise<void> {
+    const { id } = jwt.verify(token, config.emailSecret) as { id: string };
+    const user = await this.repo.findOne(id);
+    if (user && !user.emailConfirmed) {
+      user.emailConfirmed = true;
+      await this.repo.save(user);
+    } else {
+      throw new ErrorHandler(400, 'Invalid email confirmation token');
     }
   }
 }
