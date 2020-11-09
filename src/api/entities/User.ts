@@ -33,6 +33,9 @@ export class User {
   @Column()
   role?: Role = 'user';
 
+  @Column()
+  emailConfirmed?: boolean = false;
+
   public constructor(data?: User) {
     if (data) {
       this.firstName = data.firstName;
@@ -40,6 +43,7 @@ export class User {
       this.email = data.email;
       this.password = data.password;
       this.role = data.role || this.role;
+      this.emailConfirmed = data.emailConfirmed || this.emailConfirmed;
     }
   }
 

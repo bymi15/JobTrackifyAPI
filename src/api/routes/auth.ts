@@ -4,6 +4,7 @@ import { celebrate, Joi } from 'celebrate';
 import UserService from '../services/UserService';
 import { Logger } from 'winston';
 import { attachUser, isAuth } from '../middlewares';
+import { ErrorHandler } from '../../helpers/ErrorHandler';
 
 const route = Router();
 
@@ -19,7 +20,10 @@ route.post(
   }),
   async (req, res, next) => {
     const logger: Logger = Container.get('logger');
-    logger.debug('Calling /auth/register endpoint with body: %o', req.body);
+    logger.debug(
+      'Calling /auth/register endpoint with email: %s',
+      req.body.email
+    );
     try {
       const userServiceInstance = Container.get(UserService);
       const { user, token } = await userServiceInstance.register(req.body);
@@ -132,4 +136,33 @@ route.patch(
     }
   }
 );
+
+route.get('/confirmEmail/:token', async (req, res, next) => {
+  const logger: Logger = Container.get('logger');
+  logger.debug('Calling GET to /auth/confirmEmail/:token endpoint');
+  try {
+    const userServiceInstance = Container.get(UserService);
+    await userServiceInstance.confirmEmail(req.params.token);
+    return res.status(204).end();
+  } catch (e) {
+    return next(e);
+  }
+});
+
+route.get('/resendEmail', isAuth, attachUser, async (req, res, next) => {
+  const logger: Logger = Container.get('logger');
+  logger.debug('Calling GET to /auth/resendEmail endpoint');
+  try {
+    const userServiceInstance = Container.get(UserService);
+    if (req.currentUser.emailConfirmed) {
+      return next(new ErrorHandler(400, 'Email has already been confirmed'));
+    } else {
+      await userServiceInstance.sendConfirmationEmail(req.currentUser);
+      return res.status(204).end();
+    }
+  } catch (e) {
+    return next(e);
+  }
+});
+
 export default route;
