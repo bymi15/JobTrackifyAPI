@@ -32,11 +32,13 @@ export default class JobService extends CRUD<Job> {
   }
 
   private async fillCompanyField(job: Job): Promise<void> {
-    await super.fillObjectIdField(
-      job,
-      'company',
-      Container.get(CompanyService)
-    );
+    if (typeof job.company !== 'string') {
+      await super.fillObjectIdField(
+        job,
+        'company',
+        Container.get(CompanyService)
+      );
+    }
   }
   private async fillBoardField(job: Job): Promise<void> {
     await super.fillObjectIdField(job, 'board', Container.get(BoardService));

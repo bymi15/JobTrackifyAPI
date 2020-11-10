@@ -105,7 +105,8 @@ route.post(
   attachUser,
   celebrate({
     body: Joi.object({
-      company: Joi.string().required(),
+      company: Joi.string(),
+      companyCustom: Joi.string(),
       board: Joi.string().required(),
       boardColumn: Joi.string().required(),
       title: Joi.string().required(),
@@ -127,7 +128,13 @@ route.post(
       req.body.boardColumn = new mongoObjectID(
         req.body.boardColumn
       ) as ObjectID;
-      req.body.company = new mongoObjectID(req.body.company) as ObjectID;
+      if (req.body.company) {
+        req.body.company = new mongoObjectID(req.body.company) as ObjectID;
+      }
+      if (req.body.companyCustom) {
+        req.body.company = req.body.companyCustom;
+        Reflect.deleteProperty(req.body, 'companyCustom');
+      }
       const job = await jobServiceInstance.create(new Job(req.body));
       return res.status(201).json(job);
     } catch (e) {
