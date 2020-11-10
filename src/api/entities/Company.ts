@@ -47,10 +47,13 @@ export class Company {
 
   @Column()
   @IsOptional()
-  location?: {
-    locality?: string;
-    country?: string;
-  };
+  @IsString()
+  headquarters?: string;
+
+  @Column()
+  @IsOptional()
+  @IsString()
+  country?: string;
 
   @Column()
   @IsOptional()
@@ -72,7 +75,8 @@ export class Company {
       this.logo = data.logo;
       this.website = data.website;
       this.linkedInUrl = data.linkedInUrl;
-      this.location = data.location;
+      this.headquarters = data.headquarters;
+      this.country = data.country;
       this.sizeRange = data.sizeRange;
       this.totalEmployeeEstimate = data.totalEmployeeEstimate;
       this.currentEmployeeEstimate = data.currentEmployeeEstimate;
