@@ -27,7 +27,6 @@ export class Board {
     if (data) {
       this.title = data.title;
       this.owner = data.owner;
-      this.updatedAt = new Date().toISOString();
     }
   }
 }

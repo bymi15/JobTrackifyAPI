@@ -13,6 +13,7 @@ import { ErrorHandler } from '../../helpers/ErrorHandler';
 import { has } from 'lodash';
 import { Transporter } from 'nodemailer';
 import VerifyEmailTemplate from '../../helpers/EmailTemplates/VerifyEmailTemplate';
+import NewUserNotificationTemplate from '../../helpers/EmailTemplates/NewUserNotificationTemplate';
 
 @Service()
 export default class UserService extends CRUD<User> {
@@ -56,7 +57,7 @@ export default class UserService extends CRUD<User> {
     const user = userRecord;
     Reflect.deleteProperty(user, 'password');
     this.sendConfirmationEmail(user);
-
+    this.sendNotificationEmail(user);
     return { user, token };
   }
 
@@ -85,6 +86,17 @@ export default class UserService extends CRUD<User> {
       to: user.email,
       subject: 'Welcome to Job Trackify - Confirm your email',
       html: VerifyEmailTemplate(user, url),
+    });
+  }
+
+  async sendNotificationEmail(user: User): Promise<void> {
+    this.logger.debug(`Sending notification email`);
+    if (config.testEnv) return;
+    this.transporter.sendMail({
+      from: 'Job Trackify contact@jobtrackify.com',
+      to: 'jobtrackify@gmail.com',
+      subject: 'New User: ' + user.firstName + ' ' + user.lastName,
+      html: NewUserNotificationTemplate(user),
     });
   }
 
@@ -160,9 +172,6 @@ export default class UserService extends CRUD<User> {
     if (validPassword) {
       const hashedPassword = await bcrypt.hash(data.password, 12);
       user.password = hashedPassword;
-      if (has(user, 'updatedAt')) {
-        user['updatedAt'] = new Date().toISOString();
-      }
       return await this.repo.save(user);
     } else {
       throw new ErrorHandler(400, 'Invalid password');
