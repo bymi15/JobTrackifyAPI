@@ -10,7 +10,6 @@ import { IUserInputDTO, IUserResponseDTO } from '../../types';
 import { validate } from 'class-validator';
 import CRUD from './CRUD';
 import { ErrorHandler } from '../../helpers/ErrorHandler';
-import { has } from 'lodash';
 import { Transporter } from 'nodemailer';
 import VerifyEmailTemplate from '../../helpers/EmailTemplates/VerifyEmailTemplate';
 import NewUserNotificationTemplate from '../../helpers/EmailTemplates/NewUserNotificationTemplate';
