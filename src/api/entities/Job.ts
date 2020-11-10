@@ -13,7 +13,7 @@ export class Job {
 
   @Column()
   @IsNotEmpty()
-  company?: ObjectID | Company;
+  company?: ObjectID | Company | string;
 
   @Column()
   @IsNotEmpty()
