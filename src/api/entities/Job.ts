@@ -77,7 +77,6 @@ export class Job {
       this.sortOrder = data.sortOrder;
       this.dateApplied = data.dateApplied;
       this.owner = data.owner;
-      this.updatedAt = new Date().toISOString();
     }
   }
 }

@@ -36,6 +36,10 @@ export class User {
   @Column()
   emailConfirmed?: boolean = false;
 
+  @Column()
+  @IsString()
+  createdAt?: string = new Date().toISOString();
+
   public constructor(data?: User) {
     if (data) {
       this.firstName = data.firstName;
