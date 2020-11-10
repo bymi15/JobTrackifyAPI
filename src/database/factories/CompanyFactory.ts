@@ -7,10 +7,10 @@ export default (data?: Company): Company => {
     description: (data && data.description) || faker.company.catchPhrase(),
     logo: (data && data.logo) || faker.image.business(),
     website: (data && data.website) || faker.internet.url(),
-    location: (data && data.location) || {
-      locality: faker.address.city(),
-      country: faker.address.country(),
-    },
+    headquarters:
+      (data && data.headquarters) ||
+      faker.address.city() + ', ' + faker.address.country(),
+    country: (data && data.country) || faker.address.country(),
     industry: (data && data.industry) || faker.company.bsNoun(),
     foundedYear: (data && data.foundedYear) || faker.date.past().getFullYear(),
     linkedInUrl: (data && data.linkedInUrl) || faker.internet.url(),

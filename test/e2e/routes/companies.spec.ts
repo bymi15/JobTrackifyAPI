@@ -236,7 +236,7 @@ describe('CompaniesRoute', () => {
       expect(res.body.description).toEqual(mockCompany.description);
       expect(res.body.logo).toEqual(mockCompany.logo);
       expect(res.body.website).toEqual(mockCompany.website);
-      expect(res.body.location).toEqual(mockCompany.location);
+      expect(res.body.headquarters).toEqual(mockCompany.headquarters);
       expect(res.body.industry).toEqual(mockCompany.industry);
       expect(res.body.foundedYear).toEqual(mockCompany.foundedYear);
       expect(res.body.linkedInUrl).toEqual(mockCompany.linkedInUrl);
@@ -267,7 +267,7 @@ describe('CompaniesRoute', () => {
       expect(res.body.description).toEqual(mockCompany.description);
       expect(res.body.logo).toEqual(mockCompany.logo);
       expect(res.body.website).toEqual(mockCompany.website);
-      expect(res.body.location).toEqual(mockCompany.location);
+      expect(res.body.headquarters).toEqual(mockCompany.headquarters);
       expect(res.body.industry).toEqual(mockCompany.industry);
       expect(res.body.foundedYear).toEqual(mockCompany.foundedYear);
       expect(res.body.linkedInUrl).toEqual(mockCompany.linkedInUrl);
@@ -426,7 +426,7 @@ describe('CompaniesRoute', () => {
       expect(res.body.description).toEqual(mockBody.description);
       expect(res.body.logo).toEqual(mockCompany.logo);
       expect(res.body.website).toEqual(mockCompany.website);
-      expect(res.body.location).toEqual(mockCompany.location);
+      expect(res.body.headquarters).toEqual(mockCompany.headquarters);
       expect(res.body.industry).toEqual(mockCompany.industry);
       expect(res.body.foundedYear).toEqual(mockCompany.foundedYear);
     });
@@ -453,7 +453,7 @@ describe('CompaniesRoute', () => {
       expect(res.body.description).toEqual(mockBody.description);
       expect(res.body.logo).toEqual(mockCompany.logo);
       expect(res.body.website).toEqual(mockCompany.website);
-      expect(res.body.location).toEqual(mockCompany.location);
+      expect(res.body.headquarters).toEqual(mockCompany.headquarters);
       expect(res.body.industry).toEqual(mockCompany.industry);
       expect(res.body.foundedYear).toEqual(mockCompany.foundedYear);
     });
