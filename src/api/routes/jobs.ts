@@ -44,7 +44,7 @@ route.get('/board/:id', isAuth, attachUser, async (req, res, next) => {
     const board = await boardServiceInstance.getRepo().findOne(req.params.id);
     if (!board) return res.sendStatus(500);
     if (
-      req.currentUser.role === 'user' &&
+      req.currentUser.role !== 'admin' &&
       !(board.owner as ObjectID).equals(req.currentUser.id)
     ) {
       return res.sendStatus(403);
@@ -62,11 +62,9 @@ route.get('/:id', isAuth, attachUser, async (req, res, next) => {
   try {
     const jobServiceInstance = Container.get(JobService);
     const job = await jobServiceInstance.findOne(req.params.id);
-    const jobOwner = (await jobServiceInstance.getRepo().findOne(req.params.id))
-      .owner as ObjectID;
     if (
       req.currentUser.role !== 'admin' &&
-      !jobOwner.equals(req.currentUser.id)
+      !(job.owner as ObjectID).equals(req.currentUser.id)
     ) {
       return res.sendStatus(403);
     }

@@ -15,6 +15,7 @@ import BoardColumnFactory from '../../src/database/factories/BoardColumnFactory'
 import { User } from '../../src/api/entities/User';
 import { Board } from '../../src/api/entities/Board';
 import { BoardColumn } from '../../src/api/entities/BoardColumn';
+import { ErrorHandler } from '../../src/helpers/ErrorHandler';
 jest.mock('../../src/logger');
 
 describe('JobService', () => {
@@ -88,6 +89,30 @@ describe('JobService', () => {
       const response = await jobServiceInstance.create(mockJob);
       expect(response).toBeDefined();
       expect(response.id).toBeDefined();
+    });
+    test('Should return internal server error when creating a job where board owner differs from job owner', async () => {
+      const newUser = await userSeed.seedOne();
+      const newBoard = await new BoardSeed(
+        connection.getMongoRepository(Board),
+        newUser.id
+      ).seedOne();
+      const mockJob = JobFactory({
+        company: mockCompany.id,
+        board: newBoard.id,
+        boardColumn: mockBoardColumnA.id,
+        owner: mockUser.id,
+      });
+      let response: Job, err: ErrorHandler;
+      try {
+        response = await jobServiceInstance.create(mockJob);
+      } catch (e) {
+        err = e;
+      }
+      expect(response).toBeUndefined();
+      expect(err).toBeDefined();
+      expect(err).toEqual(
+        new ErrorHandler(500, 'Job owner cannot be different to board owner')
+      );
     });
     test('Should set the correct sort order', async () => {
       const mockJob = await jobSeed.seedOne({
