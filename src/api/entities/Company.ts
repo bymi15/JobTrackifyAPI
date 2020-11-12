@@ -1,4 +1,4 @@
-import { Entity, ObjectIdColumn, Column, Index, ObjectID } from 'typeorm';
+import { Entity, ObjectIdColumn, Column, ObjectID } from 'typeorm';
 import { IsUrl, IsString, IsNumber, IsOptional } from 'class-validator';
 
 @Entity()
@@ -8,7 +8,6 @@ export class Company {
 
   @Column()
   @IsString()
-  @Index({ unique: true })
   name?: string;
 
   @Column()
