@@ -75,6 +75,14 @@ export default class JobService extends CRUD<Job> {
   }
 
   async create(job: Job): Promise<Job> {
+    const boardService = Container.get(BoardService);
+    const board = await boardService.getRepo().findOne(job.board);
+    if (!(job.owner as ObjectID).equals(board.owner as ObjectID)) {
+      throw new ErrorHandler(
+        500,
+        'Job owner cannot be different to board owner'
+      );
+    }
     const count = await super.count({
       board: job.board,
       boardColumn: job.boardColumn,
@@ -149,7 +157,6 @@ export default class JobService extends CRUD<Job> {
       await this.fillCompanyField(job);
       await this.fillBoardField(job);
       await this.fillBoardColumnField(job);
-      Reflect.deleteProperty(job, 'owner');
     }
     return jobs;
   }
@@ -159,7 +166,6 @@ export default class JobService extends CRUD<Job> {
     await this.fillCompanyField(job);
     await this.fillBoardField(job);
     await this.fillBoardColumnField(job);
-    Reflect.deleteProperty(job, 'owner');
     return job;
   }
 
