@@ -1,5 +1,4 @@
 import Container, { Inject, Service } from 'typedi';
-import { ObjectId as mongoObjectID } from 'mongodb';
 import { Job } from '../entities/Job';
 import { MongoRepository, ObjectID, ObjectLiteral } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
@@ -12,6 +11,7 @@ import { ErrorHandler } from '../../helpers/ErrorHandler';
 import _ from 'lodash';
 import NodeGeocoder, { GoogleOptions } from 'node-geocoder';
 import config from '../../config';
+import { toObjectId } from '../../helpers/toObjectId';
 
 const options: GoogleOptions = {
   provider: 'google',
@@ -59,8 +59,8 @@ export default class JobService extends CRUD<Job> {
   ): Promise<void> {
     const jobs: Job[] = await super.find({
       where: {
-        board: { $eq: new mongoObjectID(board) as ObjectID },
-        boardColumn: { $eq: new mongoObjectID(boardColumn) as ObjectID },
+        board: { $eq: toObjectId(board) },
+        boardColumn: { $eq: toObjectId(boardColumn) as ObjectID },
       },
       order: { sortOrder: 'ASC' },
     });
@@ -88,9 +88,7 @@ export default class JobService extends CRUD<Job> {
   }
 
   async findByOwner(owner: string | ObjectID): Promise<Job[]> {
-    if (typeof owner === 'string') {
-      owner = new mongoObjectID(owner) as ObjectID;
-    }
+    owner = toObjectId(owner);
     const jobs: Job[] = await super.find({
       where: {
         owner: { $eq: owner },
@@ -107,9 +105,7 @@ export default class JobService extends CRUD<Job> {
   }
 
   async findByBoard(board: string | ObjectID): Promise<Job[]> {
-    if (typeof board === 'string') {
-      board = new mongoObjectID(board) as ObjectID;
-    }
+    board = toObjectId(board);
     const jobs: Job[] = await super.find({
       where: {
         board: { $eq: board },
@@ -129,12 +125,8 @@ export default class JobService extends CRUD<Job> {
     board: string | ObjectID,
     boardColumn: string | ObjectID
   ): Promise<Job[]> {
-    if (typeof board === 'string') {
-      board = new mongoObjectID(board) as ObjectID;
-    }
-    if (typeof boardColumn === 'string') {
-      boardColumn = new mongoObjectID(boardColumn) as ObjectID;
-    }
+    board = toObjectId(board);
+    boardColumn = toObjectId(boardColumn);
     const jobs: Job[] = await super.find({
       where: {
         board: { $eq: board },
@@ -203,7 +195,7 @@ export default class JobService extends CRUD<Job> {
     prevJobId?: string,
     retry?: boolean
   ) {
-    const jobId = new mongoObjectID(id) as ObjectID;
+    const jobId = toObjectId(id);
     const prevJob = prevJobId && (await super.findOne(prevJobId));
     const minSortOrder = (prevJob && prevJob.sortOrder) || 0;
     const temp = await super.find({
@@ -232,7 +224,7 @@ export default class JobService extends CRUD<Job> {
     } else {
       return await this.update(id, {
         sortOrder: newSortOrder,
-        boardColumn: new mongoObjectID(boardColumn) as ObjectID,
+        boardColumn: toObjectId(boardColumn),
       });
     }
   }
