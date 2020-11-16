@@ -21,6 +21,11 @@ export class Company {
 
   @Column()
   @IsOptional()
+  @IsString()
+  type?: string;
+
+  @Column()
+  @IsOptional()
   @IsUrl()
   website?: string;
 
@@ -72,6 +77,7 @@ export class Company {
       this.name = data.name;
       this.description = data.description;
       this.logo = data.logo;
+      this.type = data.type;
       this.website = data.website;
       this.linkedInUrl = data.linkedInUrl;
       this.headquarters = data.headquarters;

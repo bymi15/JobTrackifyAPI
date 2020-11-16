@@ -6,6 +6,7 @@ export default (data?: Company): Company => {
     name: (data && data.name) || faker.company.companyName(),
     description: (data && data.description) || faker.company.catchPhrase(),
     logo: (data && data.logo) || faker.image.business(),
+    type: (data && data.type) || faker.company.bsNoun(),
     website: (data && data.website) || faker.internet.url(),
     headquarters:
       (data && data.headquarters) ||

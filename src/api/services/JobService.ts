@@ -90,6 +90,7 @@ export default class JobService extends CRUD<Job> {
     job.sortOrder = (count + 1) * 1000;
     const savedJob = await super.create(job);
     await this.fillCompanyField(savedJob);
+    await this.fillBoardField(savedJob);
     await this.fillBoardColumnField(savedJob);
     Reflect.deleteProperty(savedJob, 'owner');
     return savedJob;
@@ -122,8 +123,8 @@ export default class JobService extends CRUD<Job> {
     });
     for (const job of jobs) {
       Reflect.deleteProperty(job, 'owner');
-      Reflect.deleteProperty(job, 'board');
       await this.fillCompanyField(job);
+      await this.fillBoardField(job);
       await this.fillBoardColumnField(job);
     }
     return jobs;
@@ -189,6 +190,7 @@ export default class JobService extends CRUD<Job> {
     }
     const updatedJob = await super.update(id, updatedFields);
     await this.fillCompanyField(updatedJob);
+    await this.fillBoardField(updatedJob);
     await this.fillBoardColumnField(updatedJob);
     Reflect.deleteProperty(updatedJob, 'owner');
     return updatedJob;
