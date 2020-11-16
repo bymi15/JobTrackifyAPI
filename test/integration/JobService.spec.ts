@@ -16,6 +16,7 @@ import { User } from '../../src/api/entities/User';
 import { Board } from '../../src/api/entities/Board';
 import { BoardColumn } from '../../src/api/entities/BoardColumn';
 import { ErrorHandler } from '../../src/helpers/ErrorHandler';
+import nodemailer from 'nodemailer';
 jest.mock('../../src/logger');
 
 describe('JobService', () => {
@@ -36,6 +37,17 @@ describe('JobService', () => {
     connection = await databaseLoader();
     await connection.synchronize(true);
     Container.set('logger', Logger);
+    Container.set(
+      'transporter',
+      nodemailer.createTransport({
+        host: 'mockHost',
+        port: 587,
+        auth: {
+          user: 'mockUser',
+          pass: 'mockPass',
+        },
+      })
+    );
     jobServiceInstance = Container.get(JobService);
     companySeed = new EntitySeed<Company>(
       connection.getMongoRepository(Company),
