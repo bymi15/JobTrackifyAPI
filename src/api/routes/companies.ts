@@ -33,6 +33,22 @@ route.get('/:id', isAuth, async (req, res, next) => {
   }
 });
 
+route.get('/search/:query', isAuth, async (req, res, next) => {
+  const query = req.params.query;
+  const logger: Logger = Container.get('logger');
+  logger.debug(
+    'Calling GET to /companies/search/:query endpoint with query: %s',
+    query
+  );
+  try {
+    const companyServiceInstance = Container.get(CompanyService);
+    const companies = await companyServiceInstance.search(query);
+    return res.json(companies).status(200);
+  } catch (e) {
+    return next(e);
+  }
+});
+
 route.delete('/:id', isAuth, checkRole('staff'), async (req, res, next) => {
   const companyId = req.params.id;
   const logger: Logger = Container.get('logger');
