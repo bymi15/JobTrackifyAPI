@@ -69,9 +69,6 @@ export class Company {
   @IsNumber()
   foundedYear?: number;
 
-  @Column()
-  createdAt?: string = new Date().toISOString();
-
   public constructor(data?: Company) {
     if (data) {
       this.name = data.name;

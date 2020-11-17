@@ -70,17 +70,17 @@ describe('CRUD', () => {
     test('Should find all the entities ordering by field', async () => {
       const mockCompanies = await entitySeed.seedMany(5);
       mockCompanies.sort((a, b) =>
-        a.createdAt > b.createdAt ? 1 : b.createdAt > a.createdAt ? -1 : 0
+        a.name > b.name ? 1 : b.name > a.name ? -1 : 0
       );
       const responseA = await crudInstance.find({
-        order: { createdAt: 'ASC' },
+        order: { name: 'ASC' },
       });
       expect(responseA).toEqual(mockCompanies);
       mockCompanies.sort((a, b) =>
-        a.createdAt < b.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0
+        a.name < b.name ? 1 : b.name < a.name ? -1 : 0
       );
       const responseB = await crudInstance.find({
-        order: { createdAt: 'DESC' },
+        order: { name: 'DESC' },
       });
       expect(responseB).toEqual(mockCompanies);
     });
