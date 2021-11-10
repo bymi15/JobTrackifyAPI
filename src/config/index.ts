@@ -13,7 +13,7 @@ if (process.env.NODE_ENV === 'test') {
   testEnv = true;
 } else if (process.env.NODE_ENV === 'production') {
   databaseUrl = process.env.MONGODB_URI;
-  baseURL = 'https://www.jobtrackify.com';
+  baseURL = 'https://brianmin.com/jobtrackify';
 }
 
 export default {
